@@ -1,0 +1,118 @@
+---
+
+- name: "HIGH | CNTR-K8-000220 | PATCH | The Kubernetes Controller Manager must create unique service accounts for each work payload."
+  lineinfile:
+      path: "{{ controller_manager_pod_specification_file }}"
+      regexp: '^(\s+- --use-service-account-credentials=).*$'
+      line: '    - --use-service-account-credentials={{ use_service_account_credentials }}'
+      insertafter: '^\s+- kube-controller-manager$'
+  when:
+      - cntr_k8_000220
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000220
+      - CAT1
+      - CCI-000015
+      - SRG-APP-000023-CTR-000055
+      - SV-242381r799981_rule
+      - V-242381
+      - master
+      - kube_control_manager
+      - account_credentials
+
+- name: "HIGH | CNTR-K8-000290 | PATCH | User-managed resources must be created in dedicated namespaces."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_000290
+  tags:
+      - CNTR-K8-000290
+      - CAT1
+      - CCI-000366
+      - SRG-APP-000038-CTR-000105
+      - SV-242383r712505_rule
+      - V-242383
+
+- name: "HIGH | CNTR-K8-000320 | PATCH | The Kubernetes API server must have the insecure port flag disabled."
+  lineinfile:
+      path: "{{ controller_api_server_file }}"
+      regexp: '^(\s+- --insecure-port=).*$'
+      line: '    - --secure-port=0'
+      insertafter: '^\s+- kube-apiserver'
+  when:
+      - cntr_k8_000320
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000320
+      - CAT1
+      - CCI-000213
+      - SRG-APP-000033-CTR-000095
+      - SV-242386r808574_rule
+      - V-242386
+      - master
+      - api_server
+
+- name: "HIGH | CNTR-K8-000330 | PATCH | The Kubernetes Kubelet must have the read-only port flag disabled."
+  block:
+      - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled.| Slurp file {{ kubelet_config_file }}"
+        slurp:
+            src: "{{ kubelet_config_file }}"
+        register: cntr_k8_000330_slurp
+
+      - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Convert to dictionary"
+        set_fact:
+            cntr_k8_000330_original_kubelet_cfg: "{{ cntr_k8_000330_slurp.content|b64decode|from_yaml }}"
+
+      - name: "SHIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Add new value"
+        vars: 
+            cntr_k8_000330_new_kubelet_cfg:
+                readOnlyPort: 0
+        set_fact:
+            cntr_k8_000330_updated_kubelet_cfg: "{{ cntr_k8_000330_original_kubelet_cfg | combine(cntr_k8_000330_new_kubelet_cfg) }}"
+        when: cntr_k8_000330_original_kubelet_cfg.readOnlyPort is not defined
+
+      - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Update existing value"
+        set_fact:
+            cntr_k8_000330_updated_kubelet_cfg: "{{ cntr_k8_000330_original_kubelet_cfg | combine(cntr_k8_000330_updated_kubelet_cfg, recursive=True) }}"
+        vars: 
+            cntr_k8_000330_updated_kubelet_cfg:
+                readOnlyPort: 0
+        when: cntr_k8_000330_original_kubelet_cfg.readOnlyPort is defined and cntr_k8_000330_original_kubelet_cfg.readOnlyPort != 0
+
+      - name: "HIGH | CNTR-K8-000330 | PATCH | The Kubernetes Kubelet must have the read-only port flag disabled. | Verify that the --read-only-port argument is set to 0"
+        copy:
+            content: '{{ cntr_k8_000330_updated_kubelet_cfg | to_nice_yaml }}'
+            dest: "{{ kubelet_config_file }}"
+            backup: yes
+        notify: kubelet restart
+        when: cntr_k8_000330_updated_kubelet_cfg is defined
+  when:
+      - cntr_k8_000330
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000330
+      - CAT1
+      - CCI-000213
+      - SRG-APP-000033-CTR-000095
+      - SV-242387r717013_rule
+      - V-242387
+      - master
+      - kubelet
+
+- name: "HIGH | CNTR-K8-000340 | PATCH | The Kubernetes API server must have the insecure bind address not set."
+  lineinfile:
+      path: "{{ controller_api_server_file }}"
+      regexp: '^\s+- --insecure-bind-address=.*'
+      state: absent
+  when:
+      - cntr_k8_000340
+  tags:
+      - CNTR-K8-000340
+      - CAT1
+      - CCI-000213
+      - SRG-APP-000033-CTR-000095
+      - SV-242388r712520_rule
+      - V-242388
+      - master
+      - api_server

@@ -1,0 +1,15 @@
+parseable: true
+quiet: true
+skip_list:
+  - '204'
+  - '208'
+  - '303'
+  - '305'
+  - '306'
+  - '403'
+  - '602'
+  - 'fqcn-builtins'
+  - 'ignore-errors'
+  - 'risky-octal'
+use_default_rules: true
+verbosity: 0

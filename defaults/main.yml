@@ -1,2 +1,34 @@
 ---
-# defaults file for test_kubernetes
+
+# The three variables below will skip whole sections of benchmarks. A value of true will run the section, false will skip
+cntrk8stig_cat1_patch: true
+cntrk8stig_cat2_patch: true
+cntrk8stig_cat3_patch: true
+
+# This variable will either force or prevent a reboot after this role runs. It is best practice to reboot after these Changes
+# however the time you run this role might not be the best time to reboot, so we allow flexability 
+cntrk8stig_skip_reboot: false
+
+kubernetes_master: true
+
+# These variables correspond with the STIG IDs defined in the STIG and allows you to enable/disable specific rules.
+# PLEASE NOTE: These work in coordination with the cat1, cat2, cat3 group variables. You must enable an entire group
+# in order for the variables below to take effect.
+# CAT 1 rules
+cntr_k8_000220: true
+cntr_k8_000290: true
+cntr_k8_000320: true
+cntr_k8_000330: true
+
+# API Server pod specification file
+api_server_pod_specification_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
+
+# Controller Manager pod specification file
+# Path and filename of the controller manager configuration file
+controller_manager_pod_specification_file: "/etc/kubernetes/manifests/kube-controller-manager.yaml"
+# value to set the use_service_account_credentials value. To conform to STIG standards this needs to be set to true
+use_service_account_credentials: "true"
+controller_api_server_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
+
+# Kubelet
+kubelet_config_file: "/var/lib/kubelet/config.yaml"
