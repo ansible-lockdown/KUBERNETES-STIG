@@ -81,6 +81,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_000190
+      - kubernetes_master
   tags:
       - CNTR-K8-000190
       - CAT2
@@ -89,3 +90,94 @@
       - SV-242380r754800_rule
       - V-242380
       - kube_etcd
+
+- name: "MEDIUM | CNTR-K8-000270 | PATCH | The Kubernetes API Server must enable Node,RBAC as the authorization mode."
+  lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --authorization-mode.*)$'
+      line: "    - --authorization-mode=Node,RBAC"
+      insertafter: '^\s+- kube-apiserver'
+  when:
+      - cntr_k8_000270
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000270
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000090
+      - SV-242382r712502_rule
+      - V-242382
+      - kube_api_server
+
+- name: "MEDIUM | CNTR-K8-000300 | PATCH | The Kubernetes Scheduler must have secure binding."
+  lineinfile:
+      path: "{{ scheduler_pod_specification_file }}"
+      regexp: '^(\s+- --bind-address.*)$'
+      line: "    - --bind-address=127.0.0.1"
+      insertafter: '^\s+- kube-scheduler'
+  when:
+      - cntr_k8_000300
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000300
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000090
+      - SV-242384r712508_rule
+      - V-242384
+      - kube_scheduler
+
+- name: "MEDIUM | CNTR-K8-000310 | PATCH | The Kubernetes Controller Manager must have secure binding."
+  lineinfile:
+      path: "{{ controller_manager_pod_specification_file }}"
+      regexp: '^(\s+- --bind-address.*)$'
+      line: "    - --bind-addressn=127.0.0.1"
+      insertafter: '^\s+- kube-controller-manager$'
+  when:
+      - cntr_k8_000310
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000310
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000090
+      - SV-242385r712511_rule
+      - V-242385
+      - kube_control_manager
+
+- name: "MEDIUM | CNTR-K8-000350 | PATCH | The Kubernetes API server must have the secure port set."
+  lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --secure-port.*)$'
+      line: "    - --secure-port={{ cntrk8stig_kube_api_server_secure_port }}"
+      insertafter: '^\s+- kube-apiserver'
+  when:
+      - cntr_k8_000350
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000350
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000100
+      - SV-242389r712523_rule
+      - V-242389
+      - kube_api_server
+
+- name: "MEDIUM | CNTR-K8-000400 | PATCH | Kubernetes Worker Nodes must not have sshd service running."
+  systemd:
+      name: sshd
+      state: stopped
+      enabled: false
+  when:
+      - cntr_k8_000400
+      - kubernetes_master
+      - "'sshd' in ansible_facts.packages"
+  tags:
+      - CNTR-K8-000400
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000100
+      - SV-242389r712523_rule
+      - V-242389
+      - kube_api_server
+      - sshd

@@ -30,12 +30,18 @@ cntr_k8_001990: true
 cntr_k8_002000: true
 cntr_k8_002010: true
 cntr_k8_002620: true
+cntr_k8_000350: true
+cntr_k8_000400: true
 
 # CAT 2 Rules
 cntr_k8_000150: true
 cntr_k8_000160: true
 cntr_k8_000170: true
-
+cntr_k8_000180: true
+cntr_k8_000190: true
+cntr_k8_000270: true
+cntr_k8_000300: true
+cntr_k8_000310: true
 
 # API Server pod specification file
 api_server_pod_specification_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
@@ -86,3 +92,7 @@ cntrk8stig_kube_scheduler_manager_tls: "VersionTLS12"
 # cntrk8stig_kube_api_server_tls is the SSH TLS protocol to use
 # To confrom to STIG standards this value needs to VersionTLS12 or higher
 cntrk8stig_kube_api_server_tls: "VersionTLS12"
+
+# cntrk8stig_kube_api_server_secure_port is the api servers secure port number
+# To conform to STIG standards this value needs to be greater than 0
+cntrk8stig_kube_api_server_secure_port: "6443"
