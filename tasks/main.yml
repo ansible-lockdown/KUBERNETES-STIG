@@ -22,3 +22,13 @@
   tags:
       - cat1
       - high
+
+- name: flush handlers
+  meta: flush_handlers
+
+- name: Display warning counts and related control IDs
+  debug:
+      msg: "You have {{ warn_count }} Warning(s) that require investigation that are related to the following control ID(s) {{ control_number }}"
+  when: warn_count != 0
+  tags:
+      - always

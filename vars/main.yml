@@ -1,2 +1,5 @@
 ---
-# vars file for test_kubernetes
+
+# Used to control warning summar
+control_number: ""
+warn_count: 0

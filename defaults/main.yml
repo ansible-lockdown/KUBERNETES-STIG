@@ -19,6 +19,17 @@ cntr_k8_000220: true
 cntr_k8_000290: true
 cntr_k8_000320: true
 cntr_k8_000330: true
+cntr_k8_000340: true
+cntr_k8_000360: true
+cntr_k8_000370: true
+cntr_k8_000380: true
+cntr_k8_000440: true
+cntr_k8_001160: true
+cntr_k8_001620: true
+cntr_k8_001990: true
+cntr_k8_002000: true
+cntr_k8_002010: true
+cntr_k8_002620: true
 
 # API Server pod specification file
 api_server_pod_specification_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
@@ -32,3 +43,17 @@ controller_api_server_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
 
 # Kubelet
 kubelet_config_file: "/var/lib/kubelet/config.yaml"
+
+# CAT1 Variables
+
+# CNTR-K8-001990
+# cntrk8stig_kubeapi_auth_mode is the authorization mode for API authentication
+# To conform to STIG standards this should not be set to AlwaysAllow, any other valid authentication value is acceptable
+# Valid options are: ABAC, RBAC, Webhook, Node, and AlwaysDeny
+cntrk8stig_kubeapi_auth_mode: "Webhook"
+
+# CNTR-K8-002000
+# cntrk8stig_kubeapi_enable_admission_plugins are the admission plugins in the api config
+# To conform to STIG standards the ValidatingAdmissionWebhook value needs to be in the list
+# The list needs to be a comma seperated list if you want to include more than ValidatingAdmissionWebhook
+cntrk8stig_kubeapi_enable_admission_plugins: "ValidatingAdmissionWebhook"
