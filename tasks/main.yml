@@ -23,6 +23,13 @@
       - cat1
       - high
 
+- name: Include CAT I patches
+  import_tasks: fix-cat2.yml
+  when: cntrk8stig_cat1_patch
+  tags:
+      - cat2
+      - medium
+
 - name: flush handlers
   meta: flush_handlers
 

@@ -36,7 +36,7 @@
 
 - name: "HIGH | CNTR-K8-000320 | PATCH | The Kubernetes API server must have the insecure port flag disabled."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --insecure-port=).*$'
       line: '    - --secure-port=0'
       insertafter: '^\s+- kube-apiserver'
@@ -102,7 +102,7 @@
 
 - name: "HIGH | CNTR-K8-000340 | PATCH | The Kubernetes API server must have the insecure bind address not set."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^\s+- --insecure-bind-address=.*'
       state: absent
   when:
@@ -120,7 +120,7 @@
 
 - name: "HIGH | CNTR-K8-000360 | PATCH | The Kubernetes API server must have anonymous authentication disabled."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --anonymous-auth=.*)$'
       line: "    - --anonymous-auth=false"
       insertafter: '^\s+- kube-apiserver$'
@@ -300,7 +300,7 @@
 
 - name: "HIGH | CNTR-K8-001990 | PATCH | Kubernetes must prevent non-privileged users from executing privileged functions to include disabling, circumventing, or altering implemented security safeguards/countermeasures or the installation of patches and updates."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --authorization-mode=.*)$'
       line: "    - --authorization-mode={{ cntrk8stig_kubeapi_auth_mode }}"
       insertafter: '^\s+- kube-apiserver$'
@@ -320,7 +320,7 @@
 
 - name: "HIGH | CNTR-K8-002000 | PATCH | The Kubernetes API server must have the ValidatingAdmissionWebhook enabled."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --enable-admission-plugins=.*)$'
       line: "    - --enable-admission-plugins={{ cntrk8stig_kubeapi_enable_admission_plugins }}"
       insertafter: '^\s+- kube-apiserver$'
@@ -362,7 +362,7 @@
 
 - name: "HIGH | CNTR-K8-002620 | PATCH | Kubernetes API Server must disable basic authentication to protect information in transit."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --basic-auth-file.*)$'
       state: absent
   when:

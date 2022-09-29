@@ -31,6 +31,12 @@ cntr_k8_002000: true
 cntr_k8_002010: true
 cntr_k8_002620: true
 
+# CAT 2 Rules
+cntr_k8_000150: true
+cntr_k8_000160: true
+cntr_k8_000170: true
+
+
 # API Server pod specification file
 api_server_pod_specification_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
 
@@ -39,7 +45,13 @@ api_server_pod_specification_file: "/etc/kubernetes/manifests/kube-apiserver.yam
 controller_manager_pod_specification_file: "/etc/kubernetes/manifests/kube-controller-manager.yaml"
 # value to set the use_service_account_credentials value. To conform to STIG standards this needs to be set to true
 use_service_account_credentials: "true"
-controller_api_server_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
+
+# Scheduler pod specification file
+scheduler_pod_specification_file: "/etc/kubernetes/manifests/kube-scheduler.yaml"
+
+# etcd pod specification file
+etcd_pod_specification_file: "/etc/kubernetes/manifests/etcd.yaml"
+
 
 # Kubelet
 kubelet_config_file: "/var/lib/kubelet/config.yaml"
@@ -57,3 +69,20 @@ cntrk8stig_kubeapi_auth_mode: "Webhook"
 # To conform to STIG standards the ValidatingAdmissionWebhook value needs to be in the list
 # The list needs to be a comma seperated list if you want to include more than ValidatingAdmissionWebhook
 cntrk8stig_kubeapi_enable_admission_plugins: "ValidatingAdmissionWebhook"
+
+# CAT2 Variables
+
+# CNTR-K8-000150
+# cntrk8stig_kube_controller_manager_tls is the SSH TLS protocol to use
+# To confrom to STIG standards this value needs to VersionTLS12 or higher
+cntrk8stig_kube_controller_manager_tls: "VersionTLS12"
+
+# CNTR-K8-000160
+# cntrk8stig_kube_scheduler_manager_tls is the SSH TLS protocol to use
+# To confrom to STIG standards this value needs to VersionTLS12 or higher
+cntrk8stig_kube_scheduler_manager_tls: "VersionTLS12"
+
+# CNTR-K8-000170
+# cntrk8stig_kube_api_server_tls is the SSH TLS protocol to use
+# To confrom to STIG standards this value needs to VersionTLS12 or higher
+cntrk8stig_kube_api_server_tls: "VersionTLS12"

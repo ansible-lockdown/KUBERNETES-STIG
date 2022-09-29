@@ -1,0 +1,91 @@
+---
+
+- name: "MEDIIUM | CNTR-K8-000150 | PATCH | The Kubernetes Controller Manager must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+  lineinfile:
+      path: "{{ controller_manager_pod_specification_file }}"
+      regexp: '^(\s+- --tls-min-version.*)$'
+      line: "    - --tls-min-version={{ cntrk8stig_kube_controller_manager_tls }}"
+      insertafter: '^\s+- kube-controller-manager$'
+  when:
+      - cntr_k8_000150
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000150
+      - CAT2
+      - CCI-000068
+      - SRG-APP-000014-CTR-000035
+      - SV-242376r712484_rule
+      - V-242376
+      - ssh
+      - kube_control_manager
+
+- name: "MEDIUM | CNTR-K8-000160 | PATCH | The Kubernetes Scheduler must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+  lineinfile:
+      path: "{{ scheduler_pod_specification_file }}"
+      regexp: '^(\s+- --tls-min-version.*)$'
+      line: "    - --tls-min-version={{ cntrk8stig_kube_scheduler_manager_tls }}"
+      insertafter: '^\s+- kube-scheduler'
+  when:
+      - cntr_k8_000160
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000160
+      - CAT2
+      - CCI-000068
+      - SRG-APP-000014-CTR-000035
+      - SV-242377r712487_rule
+      - V-242377
+      - kube_scheduler
+
+- name: "MEDIUM | CNTR-K8-000170 | PATCH | The Kubernetes API Server must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+  lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --tls-min-version.*)$'
+      line: "    - --tls-min-version={{ cntrk8stig_kube_api_server_tls }}"
+      insertafter: '^\s+- kube-apiserver'
+  when:
+      - cntr_k8_000170
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000170
+      - CAT2
+      - CCI-000068
+      - SRG-APP-000014-CTR-000040
+      - SV-242378r712490_rule
+      - V-242378
+      - kube_api_server
+
+- name: "MEDIUM | CNTR-K8-000180 | PATCH | The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination."
+  lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --auto-tls=.*)$'
+      line: "    - --auto-tls=false"
+      insertafter: '^\s+- etcd'
+  when:
+      - cntr_k8_000180
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000180
+      - CAT2
+      - CCI-000068
+      - SRG-APP-000014-CTR-000035
+      - SV-242379r754799_rule
+      - V-242379
+      - kube_etcd
+
+- name: "MEDIUM | CNTR-K8-000190 | PATCH | The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination."
+  lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --peer-auto-tls=.*)$'
+      line: "    - --peer-auto-tls=false"
+      insertafter: '^\s+- etcd'
+  when:
+      - cntr_k8_000190
+  tags:
+      - CNTR-K8-000190
+      - CAT2
+      - CCI-000068
+      - SRG-APP-000014-CTR-000035
+      - SV-242380r754800_rule
+      - V-242380
+      - kube_etcd
