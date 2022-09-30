@@ -32,6 +32,10 @@ cntr_k8_002010: true
 cntr_k8_002620: true
 cntr_k8_000350: true
 cntr_k8_000400: true
+cntr_k8_000410: true
+cntr_k8_000420: true
+cntr_k8_000430: true
+cntr_k8_000450: true
 
 # CAT 2 Rules
 cntr_k8_000150: true

@@ -163,21 +163,135 @@
       - V-242389
       - kube_api_server
 
-- name: "MEDIUM | CNTR-K8-000400 | PATCH | Kubernetes Worker Nodes must not have sshd service running."
+- name: |
+      "MEDIUM | CNTR-K8-000400 | PATCH | Kubernetes Worker Nodes must not have sshd service running."
+      "MEDIUM | CNTR-K8-000410 | PATCH | Kubernetes Worker Nodes must not have the sshd service enabled."
   systemd:
       name: sshd
       state: stopped
       enabled: false
   when:
-      - cntr_k8_000400
       - kubernetes_master
       - "'sshd' in ansible_facts.packages"
+      - cntr_k8_000400 or
+        cntr_k8_000410
   tags:
       - CNTR-K8-000400
+      - CNTR-K8-000410
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000100
+      - SRG-APP-000033-CTR-000095
       - SV-242389r712523_rule
+      - SV-242394r717017_rule
       - V-242389
-      - kube_api_server
+      - V-242394
       - sshd
+
+- name: "MEDIUM | CNTR-K8-000420 | PATCH | Kubernetes dashboard must not be enabled."
+  block:
+      - name: "MEDIUM | CNTR-K8-000420 | PATCH | Kubernetes dashboard must not be enabled. | Get if dashboard available"
+        shell: kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000420_kube_dash_status
+
+      - name: "MEDIUM | CNTR-K8-000420 | PATCH | Kubernetes dashboard must not be enabled. | Remove dashboard if exists"
+        shell: kubectl delete deployment kubernetes-dashboard --namespace=kube-system
+        changed_when: true
+        when: cntr_k8_000420_kube_dash_status.stdout | length >=1
+  when:
+      - cntr_k8_000420
+  tags:
+      - CNTR-K8-000420
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000095
+      - SV-242395r712541_rule
+      - V-242395
+      - kube_dashboard
+
+- name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results."
+  block:
+      - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Get Client version"
+        shell: kubectl version --short | grep "Client Version" | cut -d"v" -f2
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000430_kubectl_client_version
+
+      - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Message out version"
+        debug:
+            msg:
+                - "Warning!! Your version needs to be 1.12.9 or newer"
+        when: cntr_k8_000430_kubectl_client_version.stdout >= 1.12.0
+
+      - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Warning count"
+        set_fact:
+            control_number: "{{ control_number }} + [ 'CNTR-K8-000430' ]"
+            warn_count: "{{ warn_count | int + 1 }}"
+        when: cntr_k8_000430_kubectl_client_version.stdout >= 1.12.0
+  when:
+      - cntr_k8_000430
+  tags:
+      - CNTR-K8-000430
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000090
+      - SV-242396r712544_rule
+      - V-242396
+      - kubectl
+
+- name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
+  block:
+      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates files"
+        shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet | cut -d":" -f1
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000450_feature_gates_files
+
+      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Update DynamicAuditing"
+        replace:
+            path: "{{ item }}"
+            regexp: 'DynamicAuditing=true'
+            replace: "DynamicAuditing=false"
+        with_items:
+            - "{{ cntr_k8_000450_feature_gates_files.stdout_lines }}"
+        when: cntr_k8_000450_feature_gates_files.stdout | length >=1
+  when:
+      - cntr_k8_000450
+      - kubernetes_master
+  tags:
+    - CNTR-K8-000450
+    - CAT2
+    - CCI-000213
+    - SRG-APP-000033-CTR-000100
+    - SV-242398r717019_rule
+    - V-242398
+    - kube_api_server
+
+# - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled."
+#   block:
+#       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Get feature-gates files"
+#         shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet | cut -d":" -f1
+#         changed_when: false
+#         failed_when: false
+#         register: cntr_k8_000450_feature_gates_files
+
+#       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Update DynamicKubeletConfig"
+#         replace:
+#             path: "{{ item }}"
+#             regexp: 'DynamicKubeletConfig=true'
+#             replace: "DynamicAuditing=false"
+#         with_items:
+#             - "{{ cntr_k8_000450_feature_gates_files.stdout_lines }}"
+#         when: cntr_k8_000450_feature_gates_files.stdout | length >=1
+#   when:
+#       - cntr_k8_000460
+#   tags:
+#       - CNTR-K8-000460
+#       - CAT2
+#       - CCI-000213
+#       - SRG-APP-000033-CTR-000095
+#       - SV-242399r717021_rule
+#       - V-242399
+#       - kube_api_server
