@@ -36,6 +36,17 @@ cntr_k8_000410: true
 cntr_k8_000420: true
 cntr_k8_000430: true
 cntr_k8_000450: true
+cntr_k8_000460: true
+cntr_k8_000470: true
+cntr_k8_000600: true
+cntr_k8_000610: true
+cntr_k8_000700: true
+cntr_k8_000850: true
+cntr_k8_000860: true
+cntr_k8_000880: true
+cntr_k8_000890: true
+cntr_k8_000900: true
+cntr_k8_000910: true
 
 # CAT 2 Rules
 cntr_k8_000150: true
@@ -46,6 +57,11 @@ cntr_k8_000190: true
 cntr_k8_000270: true
 cntr_k8_000300: true
 cntr_k8_000310: true
+
+# cntrk8stig_ansible_managed_audit_policy is the toggle allow this role manage the audit-policy file
+# If set to true this will use the template located in templates/audit-policy.yaml.j2 as the audit policy
+# The path and filename to be used is in var cntrk8stig_api_server_audit_policy_file
+cntrk8stig_ansible_managed_audit_policy: true
 
 # API Server pod specification file
 api_server_pod_specification_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
@@ -97,6 +113,22 @@ cntrk8stig_kube_scheduler_manager_tls: "VersionTLS12"
 # To confrom to STIG standards this value needs to VersionTLS12 or higher
 cntrk8stig_kube_api_server_tls: "VersionTLS12"
 
+# CNTR-K8-000350
 # cntrk8stig_kube_api_server_secure_port is the api servers secure port number
 # To conform to STIG standards this value needs to be greater than 0
 cntrk8stig_kube_api_server_secure_port: "6443"
+
+# CNTR-K8-000600
+# cntrk8stig_api_server_audit_policy_file is the path to the audit policy file used by the Kube API Server config
+# To conform to STIG standards this needs to be setup. 
+cntrk8stig_api_server_audit_policy_file: "/etc/kubernetes/audit-policy.yaml"
+
+# CNTR-K8-000610
+# cntrk8stig_api_server_audit_log_path is the path to the audit logs used by the Kube API Server config
+# To conform to STIG standards this needs to be setup
+cntrk8stig_api_server_audit_log_path: "/var/log/kubernetes/audit/audit.log"
+
+# CNTR-K8-000700
+# cntrk8stig_api_version is the latest version of the API to use for the audit policy
+# To conform to STIG standards this needs to match the latest avialable version
+cntrk8stig_api_version: "v1"

@@ -269,29 +269,293 @@
     - V-242398
     - kube_api_server
 
-# - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled."
-#   block:
-#       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Get feature-gates files"
-#         shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet | cut -d":" -f1
-#         changed_when: false
-#         failed_when: false
-#         register: cntr_k8_000450_feature_gates_files
+- name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
+  block:
+      - name: "MEDIUM | CNTR-K8-000450 | AUDIT | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates"
+        shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000450_feature_gates
 
-#       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Update DynamicKubeletConfig"
-#         replace:
-#             path: "{{ item }}"
-#             regexp: 'DynamicKubeletConfig=true'
-#             replace: "DynamicAuditing=false"
-#         with_items:
-#             - "{{ cntr_k8_000450_feature_gates_files.stdout_lines }}"
-#         when: cntr_k8_000450_feature_gates_files.stdout | length >=1
-#   when:
-#       - cntr_k8_000460
-#   tags:
-#       - CNTR-K8-000460
-#       - CAT2
-#       - CCI-000213
-#       - SRG-APP-000033-CTR-000095
-#       - SV-242399r717021_rule
-#       - V-242399
-#       - kube_api_server
+      - name: "MEDIUM | CNTR-K8-000450 | AUDIT | Kubernetes DynamicAuditing must not be enabled | Split Get feature-gates values"
+        set_fact:
+            cntr_k8_000450_split_fg: "{{ cntr_k8_000450_feature_gates.stdout_lines | map('regex_replace', ld_passwd_regex, ld_passwd_yaml) | map('from_yaml') | list }}"
+        vars:
+            ld_passwd_regex: >-
+                ^(?P<path>[^:]*):(?P<entry>[^:]*)
+            ld_passwd_yaml: |
+                path: >-4
+                    \g<path>
+                entry: >-4
+                    \g<entry>
+        when: cntr_k8_000450_feature_gates.stdout | length >= 1
+
+      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Update DynamicKubeletConfig"
+        replace:
+            path: "{{ item.path }}"
+            regexp: 'DynamicKubeletConfig=true'
+            replace: "DynamicKubeletConfig=false"
+        notify: kubelet restart
+        with_items:
+            - "{{ cntr_k8_000450_split_fg }}"
+        when:
+            - cntr_k8_000450_feature_gates.stdout | length >= 1
+            - "'DynamicKubeletConfig=true' in item.entry"
+
+      - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Add DynamicKubeletConfig"
+        lineinfile:
+            path: "{{ item.path }}"
+            regexp: '^(\s+- --feature-gates=.*)$'
+            line: "{{ item.entry }},DynamicKubeletConfig=false"
+            insertafter: '^\s+- kube-apiserver'
+        notify: kubelet restart
+        with_items:
+            - "{{ cntr_k8_000450_split_fg }}"
+        loop_control:
+            label: "{{ item.path }}"
+        when:
+            - cntr_k8_000450_feature_gates.stdout | length >= 1
+            - "'DynamicKubeletConfig=' not in item.entry"
+  when:
+      - cntr_k8_000460
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000460
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000095
+      - SV-242399r717021_rule
+      - V-242399
+      - feature_gates
+
+- name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled."
+  block:
+      - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Get feature-gate paths and entries"
+        shell: grep -is feature-gates /etc/kubernetes/manifests/*
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000470_feature_gates
+
+      - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Split Get feature-gates values"
+        set_fact:
+            cntr_k8_000470_split_fg: "{{ cntr_k8_000470_feature_gates.stdout_lines | map('regex_replace', split_000470_regex, split_000470_yaml) | map('from_yaml') | list }}"
+        vars:
+            split_000470_regex: >-
+                ^(?P<path>[^:]*):(?P<entry>[^:]*)
+            split_000470_yaml: |
+                path: >-4
+                    \g<path>
+                entry: >-4  
+                    \g<entry>
+        when: cntr_k8_000470_feature_gates.stdout | length >= 1
+
+      - name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled. | Update AllAlpha"
+        replace:
+            path: "{{ item.path }}"
+            regexp: 'AllAlpha=true'
+            replace: 'AllAlpha=false'
+        notify: kubelet restart
+        with_items:
+            - "{{ cntr_k8_000470_split_fg }}"
+        loop_control:
+            label: "{{ item.path }}"
+        when:
+            - cntr_k8_000470_feature_gates.stdout | length >=1
+            - "'AllAlpha=true' in item.entry"
+  when:
+      - cntr_k8_000470
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000470
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000090
+      - SV-242400r712556_rule
+      - V-242400
+      - feature_gates
+
+- name: "MEDIUM | CNTR-K8-000600 | PATCH | The Kubernetes API Server must have an audit policy set."
+  lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --audit-policy-file.*)$'
+      line: "    - --audit-policy-file={{ cntrk8stig_api_server_audit_policy_file }}"
+      insertafter: '^\s+- kube-apiserver'
+  when:
+      - cntr_k8_000600
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000600
+      - CAT2
+      - CCI-001464
+      - SRG-APP-000092-CTR-000165
+      - SV-242401r712559_rule
+      - V-242401
+      - kube_api_server
+
+- name: "MEDIIUM | CNTR-K8-000610 | PATCH | The Kubernetes API Server must have an audit log path set."
+  lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --audit-log-path.*)$'
+      line: "    - --audit-log-path={{ cntrk8stig_api_server_audit_log_path }}"
+      insertafter: '^\s+- kube-apiserver'
+  when:
+      - cntr_k8_000610
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000610
+      - CAT2
+      - CCI-001464
+      - SRG-APP-000092-CTR-000165
+      - SV-242402r712562_rule
+      - V-242402
+      - kube_api_server
+
+- name: "MEDIUM | CNTR-K8-000700 | PATCH | Kubernetes API Server must generate audit records that identify what type of event has occurred, identify the source of the event, contain the event results, identify any users, and identify any containers associated with the event."
+  template:
+      src: audit-policy.yaml.j2
+      dest: "{{ cntrk8stig_api_server_audit_policy_file }}"
+  when:
+      - cntr_k8_000700
+      - kubernetes_master
+      - cntrk8stig_ansible_managed_audit_policy
+  tags:
+      - CNTR-K8-000700
+      - CAT2
+      - CCI-000018
+      - CCI-000130
+      - CCI-000131
+      - CCI-000132
+      - CCI-000133
+      - CCI-000134
+      - CCI-000135
+      - CCI-000172
+      - CCI-001403
+      - CCI-001404
+      - CCI-001487
+      - CCI-001814
+      - CCI-002234
+      - SRG-APP-000026-CTR-000070
+      - SV-242403r712565_rule
+      - V-242403
+      - kube_api_server
+
+- name: "MEDIUM | CNTR-K8-000850 | PATCH | Kubernetes Kubelet must deny hostname override."
+  block:
+      - name: "MEDIUM | CNTR-K8-000850 | AUDIT | Kubernetes Kubelet must deny hostname override. | Chekc for /etc/sysconfig/kublet file"
+        stat:
+            path: /etc/sysconfig/kubelet
+        register: cntr_k8_000850_kublet_status
+
+      - name: "MEDIUM | CNTR-K8-000850 | PATCH | Kubernetes Kubelet must deny hostname override. | Remove if file exists"
+        lineinfile:
+            path: /etc/sysconfig/kubelet
+            regexp: '--hostname-override'
+            state: absent
+        notify: kubelet restart
+        when: cntr_k8_000850_kublet_status.stat.exists
+  when:
+      - cntr_k8_000850
+  tags:
+      - CNTR-K8-000850
+      - CAT2
+      - CCI-001499
+      - SRG-APP-000133-CTR-000290
+      - SV-242404r712568_rule
+      - V-242404
+      - kubelet_sysconfig
+
+- name: |
+    "MEDIUM | CNTR-K8-000860 | PATCH | The Kubernetes manifests must be owned by root."
+    "MEDIUM | CNTR-K8-000900 | PATCH | The Kubernetes manifests must have least privileges."
+  block:
+      - name: |
+          "MEDIUM | CNTR-K8-000860 | AUDIT | The Kubernetes manifests must be owned by root. | Get files"
+          "MEDIUM | CNTR-K8-000900 | AUDIT | The Kubernetes manifests must have least privileges. | Get files"
+        find:
+            path: /etc/kubernetes/manifests/
+            patterns: '*.yaml'
+        register: cntr_k8_000860_files
+
+      - name: |
+          "MEDIUM | CNTR-K8-000860 | PATCH | The Kubernetes manifests must be owned by root. | Change permissions on files"
+          "MEDIUM | CNTR-K8-000900 | PATCH | The Kubernetes manifests must have least privileges. | Change permissions on files"
+        file:
+            path: "{{ item.path }}"
+            mode: "{{ cntr_k8_000900 | ternary('644',omit) }}"
+            owner: "{{ cntr_k8_000860 | ternary('root',omit) }}"
+            group: "{{ cntr_k8_000860 | ternary('root',omit) }}"
+        with_items:
+            - "{{ cntr_k8_000860_files.files }}"
+        loop_control:
+            label: "{{ item.path }}"
+        when: cntr_k8_000860_files.matched >= 1
+  when:
+      - cntr_k8_000860 or
+        cntr_k8_000900
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000860
+      - CNTR-K8-000900
+      - CAT2
+      - CCI-001499
+      - SRG-APP-000133-CTR-000295
+      - SRG-APP-000133-CTR-000310
+      - SV-242405r712571_rule
+      - SV-242408r712580_rule
+      - V-242405
+      - V-242408
+      - permissions
+
+- name: |
+    "MEDIUM | CNTR-K8-000880 | PATCH | The Kubernetes kubelet configuration file must be owned by root."
+    "MEDIUM | CNTR-K8-000890 | PATCH | The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive."
+  block:
+      - name: |
+          "MEDIUM | CNTR-K8-000880 | AUDIT | The Kubernetes kubelet configuration file must be owned by root. | Get file status"
+          "MEDIUM | CNTR-K8-000890 | AUDIT | The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive. | Get file status"
+        find:
+            path: /etc/sysconfig
+            patterns: kubelet
+        register: cntr_k8_000880_kubelet_file_status
+
+      - name: |
+          "MEDIUM | CNTR-K8-000880 | PATCH | The Kubernetes kubelet configuration file must be owned by root. | Set group and owner"
+          "MEDIUM | CNTR-K8-000890 | PATCH | The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive. | Set permissions"
+        file:
+            path: /etc/sysconfig/kubelet
+            mode: "{{ cntr_k8_000890 | ternary('644',omit) }}"
+            owner: "{{ cntr_k8_000880 | ternary('root',omit) }}"
+            group: "{{ cntr_k8_000880 | ternary('root',omit) }}"
+        when: cntr_k8_000880_kubelet_file_status.matched >= 1
+  when:
+      - cntr_k8_000880 or
+        cntr_k8_000890
+  tags:
+      - CNTR-K8-000880
+      - CNTR-K8-000890
+      - CAT2
+      - CCI-001499
+      - SRG-APP-000133-CTR-000300
+      - SRG-APP-000133-CTR-000305
+      - SV-242406r712574_rule
+      - SV-242407r799982_rule
+      - V-242406
+      - V-242407
+      - permissions
+
+- name: "MEDIUM | CNTR-K8-000910 | PATCH | Kubernetes Controller Manager must disable profiling."
+  lineinfile:
+      path: "{{ controller_manager_pod_specification_file }}"
+      regexp: '^(\s+- --profiling.*)$'
+      line: "    - --profiling=false"
+      insertafter: '^\s+- kube-controller-manager$'
+  when:
+      - cntr_k8_000910
+  tags:
+      - CNTR-K8-000910
+      - CAT2
+      - CCI-000381
+      - SRG-APP-000141-CTR-000315
+      - SV-242409r712583_rule
+      - V-242409
+      - kube_control_manager
