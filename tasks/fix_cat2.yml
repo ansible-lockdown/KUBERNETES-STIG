@@ -530,6 +530,7 @@
   when:
       - cntr_k8_000880 or
         cntr_k8_000890
+      - kubernetes_master
   tags:
       - CNTR-K8-000880
       - CNTR-K8-000890
@@ -551,6 +552,7 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000910
+      - kubernetes_master
   tags:
       - CNTR-K8-000910
       - CAT2
@@ -559,3 +561,1007 @@
       - SV-242409r712583_rule
       - V-242409
       - kube_control_manager
+
+- name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)"
+  block:
+      - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Get secure port"
+        shell: grep -I -secure-port {{ scheduler_pod_specification_file }}
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000920_secure_port
+
+      - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Get etcd servers"
+        shell: grep -I -etcd-servers {{ scheduler_pod_specification_file }}
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000920_etcd_servers
+
+      - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Get namespace"
+        shell: kubectl describe services –all-namespace
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000920_name_space
+
+      - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Display ports, etcd servers, and name space"
+        debug:
+            msg:
+                - "Warning!! Below are the secure port, etcd servers, and name spaces of the kube-api-server configuration"
+                - To conform to STIG standards these need to conform to PPSM CAL standards"
+                - "Your secure port(s):"
+                - "{{ (cntr_k8_000920_secure_port.stdout | length >= 1) | ternary(cntr_k8_000920_secure_port.stdout_lines,'Not Configured') }}"
+                - "Your etcd servers:"
+                - "{{ (cntr_k8_000920_etcd_servers.stdout | length >= 1) | ternary(cntr_k8_000920_etcd_servers.stdout_lines,'Not Configured') }}"
+                - "Your namespace:"
+                - "{{ (cntr_k8_000920_name_space.stdout | length >= 1) | ternary(cntr_k8_000920_name_space.stdout_lines,'Not Configured') }}"
+  when:
+      - cntr_k8_000920
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000920
+      - CAT2
+      - CCI-000382
+      - SRG-APP-000142-CTR-000325
+      - SV-242410r808576_rule
+      - V-242410
+      - ppsm_cal
+
+- name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)."
+  block:
+      - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get insecure ports"
+        shell: grep -I -insecure-port {{ scheduler_pod_specification_file }}
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000930_insecure_port
+
+      - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get secure ports"
+        shell: grep -I -secure-port {{ scheduler_pod_specification_file }}
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000930_secure_port
+
+      - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get namespaces"
+        shell: kubectl describe services –all-namespace
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000930_name_space
+
+      - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Display ports and namespace"
+        debug:
+            msg:
+                - "Warning!! Below are the ports and namespaces in the kube-schedule.yaml configuration"
+                - "To conform to STIG standards these need to conform to PPSM CAL standards"
+                - "Your insecure port(s):"
+                - "{{ (cntr_k8_000930_insecure_port.stdout | length >= 1) | ternary(cntr_k8_000930_insecure_port.stdout_lines,'Not Configured') }}"
+                - "Your secure port(s):"
+                - "{{ (cntr_k8_000930_secure_port.stdout | length >= 1) | ternary(cntr_k8_000930_secure_port.stdout_lines,'Not Configured') }}"
+                - "Your name space:"
+                - "{{ (cntr_k8_000930_name_space.stdout | length >= 1) | ternary(cntr_k8_000930_name_space.stdout_lines,'Not Configured') }}"
+  when:
+      - cntr_k8_000930
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000930
+      - CAT2
+      - CCI-000382
+      - SRG-APP-000142-CTR-000325
+      - SV-242411r712589_rule
+      - V-242411
+      - ppsm_cal
+
+- name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)."
+  block:
+      - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get secure ports"
+        shell: grep -I -secure-port {{ controller_manager_pod_specification_file }}
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000940_secure_port
+
+      - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get namespaces"
+        shell: kubectl describe services –all-namespace
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000940_name_space
+
+      - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Display ports nad namespace"
+        debug:
+            msg:
+                - "Warning!! Below are the ports and namespaces in the kube-controller-manager.yaml configuration"
+                - "To conform to STIG standards these need to conform to PPSM CAL standards"
+                - "Your secure port(s):"
+                - "{{ (cntr_k8_000940_secure_port.stdout | length >= 1) | ternary(cntr_k8_000940_secure_port.stdout_lines,'Not Configured') }}"
+                - "Your namespace:"
+  when:
+      - cntr_k8_000940
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000940
+      - CAT2
+      - CCI-000382
+      - SRG-APP-000142-CTR-000330
+      - SV-242412r808578_rule
+      - V-242412
+      - ppsm_cal
+
+- name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)."
+  block:
+      - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get etcd servers"
+        shell: grep -I -etcd-servers {{ controller_api_server_file }}
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_000950_etcd_servers
+
+      - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Display etcd servers"
+        debug:
+            msg:
+                - "Warning!! Below are the etcd servers in the kupe-apiserver.yaml configuration"
+                - To conform to STIG standards these need to conform to PPSM CAL standards"
+                - "Your etcd servers:"
+                - "{{ (cntr_k8_000950_etcd_servers.stdout | length >=1) | ternary(cntr_k8_000950_etcd_servers.stdout_lines,'Not Configured') }}"
+  when:
+      - cntr_k8_000950
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000950
+      - CAT2
+      - CCI-000382
+      - SRG-APP-000142-CTR-000325
+      - SV-242413r712595_rule
+      - V-242413
+      - ppsm_cal
+
+- name: "MEDIUM | CNTR-K8-000960 | AUDIT | The Kubernetes cluster must use non-privileged host ports for user pods."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_000960
+      - kubernetes_master
+  tags:
+      - CNTR-K8-000960
+      - CAT2
+      - CCI-000382
+      - SRG-APP-000142-CTR-000330
+      - SV-242414r717030_rule
+      - V-242414
+      - namespace
+      - not_implemented
+
+- name: "MEDIUM | CNTR-K8-001360 | AUDIT | Kubernetes must separate user functionality."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001360
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001360
+      - CAT2
+      - CCI-001082
+      - SRG-APP-000211-CTR-000530
+      - SV-242417r712607_rule
+      - V-242417
+      - namespace
+      - not_implemented
+
+- name: "MEDIUM | CNTR-K8-001400 | PATCH | The Kubernetes API server must use approved cipher suites."
+  lineinfile:
+      path: "{{ controller_api_server_file }}"
+      regexp: '^(\s+- --tls-cipher-suites=.*)$'
+      line: "    - --tls-cipher-suites={{ cntrk8stig_kubeapi_tls_cipher_suites }}"
+      insertafter: '^\s+- kube-apiserver$'
+  when:
+      - cntr_k8_001400
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001400
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242418r799985_rule
+      - V-242418
+      - kube_api_server
+      - cyphers
+
+- name: "MEDIUM | CNTR-K8-001410 | PATCH | Kubernetes API Server must have the SSL Certificate Authority set."
+  lineinfile:
+      path: "{{ controller_api_server_file }}"
+      regexp: '^(\s+- --client-ca-file=.*)$'
+      line: "    - --client-ca-file={{ cntrk8stig_kubeapi_client_ca_file }}"
+      insertafter: '^\s+- kube-apiserver$'
+  when:
+      - cntr_k8_001410
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001410
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242419r712613_rule
+      - V-242419
+      - kube_api_server
+      - certificates
+
+- name: "MEDIUM | CNTR-K8-001420 | PATCH | Kubernetes Kubelet must have the SSL Certificate Authority set."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001420
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001420
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242420r799987_rule
+      - V-242420
+      - kubelet
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001430 | PATCH | Kubernetes Controller Manager must have the SSL Certificate Authority set."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001430
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001430
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242421r717033_rule
+      - V-242421
+      - kube_control_manager
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001440 | PATCH |  Kubernetes API Server must have a certificate for communication."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001440
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001440
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242422r712622_rule
+      - V-242422
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001450 | PATCH | Kubernetes etcd must enable client authentication to secure service."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001450
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001450
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242423r808580_rule
+      - V-242423
+      - kube_etcd
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001460
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001460
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242424r825890_rule
+      - V-242424
+      - kubelet
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001470
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001470
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242425r825892_rule
+      - V-242425
+      - kubelet
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001480 | PATCH | Kubernetes etcd must enable client authentication to secure service."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001480
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001480
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242426r821607_rule
+      - V-242426
+      - kube_etcd
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001490 | PATCH | Kubernetes etcd must have a key file for secure communication."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001490
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001490
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242427r808583_rule
+      - V-242427
+      - kube_etcd
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001500 | PATCH | Kubernetes etcd must have a certificate for communication."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001500
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001500
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242428r808586_rule
+      - V-242428
+      - kube_etcd
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001510 | PATCH | Kubernetes etcd must have the SSL Certificate Authority set."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001510
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001510
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242429r808589_rule
+      - V-242429
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001520 | PATCH | Kubernetes etcd must have a certificate for communication."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001520
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001520
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242430r808592_rule
+      - V-242430
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001530 | PATCH | Kubernetes etcd must have a key file for secure communication."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001530
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001530
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242431r808595_rule
+      - V-242431
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001540 | PATCH | Kubernetes etcd must have peer-cert-file set for secure communication."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001540
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001540
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242432r808597_rule
+      - V-242432
+      - kube_etcd
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001550 | PATCH | Kubernetes etcd must have a peer-key-file set for secure communication."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001550
+      - kubernetes_master
+  tags:
+      - CNTR-K8-001550
+      - CAT2
+      - CCI-001184
+      - SRG-APP-000219-CTR-000550
+      - SV-242433r808599_rule
+      - V-242433
+      - kube_etcd
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-002600 | PATCH | Kubernetes API Server must configure timeouts to limit attack surface."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_002600
+      - kubernetes_master
+  tags:
+      - CNTR-K8-002600
+      - CAT2
+      - CCI-002385
+      - SRG-APP-000435-CTR-001070
+      - SV-242438r754802_rule
+      - V-242438
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-002700 | PATCH | Kubernetes must remove old components after updated versions have been installed."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_002700
+      - kubernetes_master
+  tags:
+      - CNTR-K8-002700
+      - CAT2
+      - CCI-002617
+      - SRG-APP-000454-CTR-001110
+      - SV-242442r712682_rule
+      - V-242442
+      - kube_ctl
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs."
+  block:
+      - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. | Warn on bad version"
+        debug:
+            msg:
+                - "Warning!! Please make sure you are on version 1.16.7 or newer"
+
+      - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. | Set counter"
+        set_fact:
+            control_number: "{{ control_number }} + ['CNTR-K8-002720']"
+            warn_count: "{{ warn_count | int + 1 }}"
+  when:
+      - cntr_k8_002720
+  tags:
+      - CNTR-K8-002720
+      - CAT2
+      - CCI-002605
+      - SRG-APP-000456-CTR-001125
+      - SV-242443r712685_rule
+      - V-242443
+
+- name: "MEDIUM | CNTR-K8-003110 | PATCH | The Kubernetes component manifests must be owned by root."
+  block:
+      - name: "MEDIUM | CNTR-K8-003110 | AUDIT | The Kubernetes component manifests must be owned by root. | Find manifest files"
+        find:
+            path: "/etc/kubernetes/manifests"
+            patterns: "*.yaml"
+        register: cntr_k8_003110_manifest_files
+      - debug: var=cntr_k8_003110_manifest_files.files
+
+      - name: "MEDIUM | CNTR-K8-003110 | PATCH | The Kubernetes component manifests must be owned by root. | Apply root owner"
+        file:
+            path: "{{ item.path }}"
+            owner: root
+        with_items:
+            - "{{ cntr_k8_003110_manifest_files.files }}"
+        loop_control:
+            label: "{{ item.path }}"
+  when:
+      - cntr_k8_003110
+  tags:
+      - CNTR-K8-003110
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SV-242444r712688_rule
+      - V-242444
+      - permissions
+
+- name: |
+    "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd."
+    "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive."
+  block:
+      - name: |
+          "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd."
+          "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive."
+        shell: find /var/lib/etcd/ \( ! -group etcd -o ! -user etcd -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_003120_etc_files
+      
+      - name: |
+          "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd."
+          "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive."
+        shell: find /var/lib/etcd/ \( ! -group etcd -o ! -user etcd -o -perm /022 \) -type d -exec stat -c "%n" '{}' \;
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_003120_etc_directories
+
+      - name: |
+          "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd. | Set file permissions"
+          "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive. | File file permissions"
+        file:
+            path: "{{ item }}"
+            mode: "{{ cntr_k8_003260 | ternary('644',omit) }}"
+            owner: "{{ cntr_k8_003120 | ternary('etcd',omit) }}"
+            group: "{{ cntr_k8_003120 | ternary('etcd',omit) }}"
+        with_items:
+            - "{{ cntr_k8_003120_etc_files.stdout_lines }}"
+        when: cntr_k8_003120_etc_files.stdout | length >= 1
+
+      - name: |
+          "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd. | Set dir permissions"
+          "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive. | Set dir permissions"
+        file:
+            path: "{{ item }}"
+            mode: "{{ cntr_k8_003260 | ternary('644',omit) }}"
+            owner: "{{ cntr_k8_003120 | ternary('etcd',omit) }}"
+            group: "{{ cntr_k8_003120 | ternary('etcd',omit) }}"
+            state: directory
+        with_items:
+            - "{{ cntr_k8_003120_etc_directories.stdout_lines }}"
+        when: cntr_k8_003120_etc_directories.stdout | length >= 1
+  when:
+      - cntr_k8_003120 or
+        cntr_k8_003260
+  tags:
+      - CNTR-K8-003120
+      - CNTR-K8-003260
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      = SRG-APP-000516-CTR-001335
+      - SV-242445r712691_rule
+      - SV-242459r712733_rule
+      - V-242445
+      - V-242459
+      - permissions
+
+- name: |
+    "MEDIUM | CNTR-K8-003130 | PATCH | The Kubernetes conf files must be owned by root."
+    "MEDIUM | CNTR-K8-003270 | PATCH | The Kubernetes admin.conf must have file permissions set to 644 or more restrictive."
+  file:
+      path: "{{ items }}"
+      mode: "{{ cntr_k8_003270 | ternary('644',omit) }}"
+      owner: "{{ cntr_k8_003130 | ternary('root',omit) }}"
+      group: "{{ cntr_k8_003130 | ternary('root',omit) }}"
+  with_items:
+      - /etc/kubernetes/admin.conf 
+      - /etc/kubernetes/scheduler.conf
+      - etc/kubernetes/controller-manager.conf
+  when:
+      - cntr_k8_003130 or
+        cntr_k8_003270
+  tags:
+      - CNTR-K8-003130
+      - CNTR-K8-003270
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SRG-APP-000516-CTR-001335
+      - SV-242446r712694_rule
+      - SV-242460r712736_rule
+      - V-242446
+      - V-242460
+      - permissions
+
+- name: |
+    "MEDIUM | CNTR-K8-003140 | PATCH | The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive."
+    "MEDIUM | CNTR-K8-003150 | PATCH | The Kubernetes Kube Proxy must be owned by root."
+  block:
+      - name: |
+          "MEDIUM | CNTR-K8-003140 | AUDIT | The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive. | Check config file status"
+          "MEDIUM | CNTR-K8-003150 | AUDIT | The Kubernetes Kube Proxy must be owned by root.| Check config file status"
+        stat:
+            path: "{{ proxy_kubeconfig_file }}"
+        register: cntr_k8_003140_proxy_config_file_status
+
+      - name: |
+          "MEDIUM | CNTR-K8-003140 | PATCH | The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive. | Set permissions"
+          "MEDIUM | CNTR-K8-003150 | PATCH | The Kubernetes Kube Proxy must be owned by root. | Set permissions"
+        file:
+            path: "{{ proxy_kubeconfig_file }}"
+            mode: "{{ cntr_k8_003140 | ternary('644',omit) }}"
+            owner: "{{ cntr_k8_003150 | ternary('root',omit) }}"
+            gropu: "{{ cntr_k8_003150 | ternary('root',omit) }}"
+        when: cntr_k8_003140_proxy_config_file_status.stat.exists
+  when:
+      - cntr_k8_003140 or
+        cntr_k8_003150
+  tags:
+      - CNTR-K8-003140
+      - CNTR-K8-003150
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SV-242447r821612_rule
+      - SV-242448r712700_rule
+      - V-242447
+      - V-242448
+      - permissions
+
+- name: "MEDIUM | CNTR-K8-003160 | PATCH | The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003160
+      - kubernetes_master
+  tags:
+      - CNTR-K8-003160
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SV-242449r821614_rule
+      - V-242449
+      - permissions
+      - not_implemented_yet
+
+
+- name: "MEDIUM | CNTR-K8-003170 | PATCH | The Kubernetes Kubelet certificate authority must be owned by root."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003170
+      - kubernetes_master
+  tags:
+      - CNTR-K8-003170
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SV-242450r754804_rule
+      - V-242450
+      - permissions
+      - not_implemented_yet
+
+- name: |
+    "MEDIUM | CNTR-K8-003180 | PATCH | The Kubernetes component PKI must be owned by root."
+    "MEDIUM | CNTR-K8-003330 | PATCH | The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive."
+  block:
+      - name: |
+          "MEDIUM | CNTR-K8-003180 | AUDIT | The Kubernetes component PKI must be owned by root. | Get files"
+          "MEDIUM | CNTR-K8-003330 | AUDIT | The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive. | Get files"
+        shell: find /etc/kubernetes/pki/ \( ! -group root -o ! -user root -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_003180_pki_files
+
+      - name: |
+          "MEDIUM | CNTR-K8-003180 | PATCH | The Kubernetes component PKI must be owned by root. | Set permissions"
+          "MEDIUM | CNTR-K8-003330 | PATCH | The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive. | Set permissions"
+        file:
+            path: "{{ item }}"
+            mode: "{{ cntr_k8_003330 | ternary('644',omit) }}"
+            owner: "{{ cntr_k8_003180 | ternary('root',omit) }}"
+            group: "{{ cntr_k8_003180 | ternary('root',omit) }}"
+        with_items:
+            - "{{ cntr_k8_003180_pki_files.stdout_lines }}"
+        when: cntr_k8_003180_pki_files.stdout | length >= 1
+  when:
+      - cntr_k8_003180 or
+        cntr_k8_003330
+  tags:
+      - CNTR-K8-003180
+      - CNTR-K8-003330
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SRG-APP-000516-CTR-001335
+      - SV-242451r712709_rule
+      - SV-242466r712754_rule
+      - V-242451
+      - V-242466
+      - permissions
+
+- name: |
+    "MEDIUM | CNTR-K8-003190 | PATCH | The Kubernetes kubelet config must have file permissions set to 644 or more restrictive."
+    "MEDIUM | CNTR-K8-003200 | PATCH | The Kubernetes kubelet config must be owned by root."
+  file:
+      path: /etc/kubernetes/kubelet.conf
+      mode: "{{ cntr_k8_003190 | ternary('644',omit) }}"
+      owner: "{{ cntr_k8_003200 | ternary('root',omit) }}"
+      group: "{{ cntr_k8_003200 | ternary('root',omit) }}"
+  when:
+      - cntr_k8_003190 or
+        cntr_k8_003200
+  tags:
+      - CNTR-K8-003190
+      - CNTR-K8-003200
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SV-242452r821616_rule
+      - SV-242453r712715_rule
+      - V-242452
+      - V-242453
+      - permissions
+
+- name: |
+    "MEDIUM | CNTR-K8-003210 | PATCH | The Kubernetes kubeadm.conf must be owned by root."
+    "MEDIUM | CNTR-K8-003220 | PATCH | The Kubernetes kubeadm.conf must have file permissions set to 644 or more restrictive."
+  file:
+      path: "{{ cntrk8stig_kubelet_service_file }}"
+      mode: "{{ cntr_k8_003220 | ternary('644',omit) }}"
+      owner: "{{ cntr_k8_003210 | ternary('root',omit) }}"
+      group: "{{ cntr_k8_003210 | ternary('root',omit) }}"
+  when:
+      - cntr_k8_003210 or
+        cntr_k8_003220
+  tags:
+      - CNTR-K8-003210
+      - CNTR-K8-003220
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001325
+      - SV-242454r754819_rule
+      - SV-242455r754822_rule
+      - V-242454
+      - V-242455
+      - permissions
+
+- name: |
+    "MEDIUM | CNTR-K8-003230 | PATCH | The Kubernetes kubelet config must have file permissions set to 644 or more restrictive."
+    "MEDIUM | CNTR-K8-003240 | PATCH | The Kubernetes kubelet config must be owned by root."
+  file:
+      path: /var/lib/kubelet/config.yaml
+      mode: "{{ cntr_k8_003230 | ternary('644',omit) }}"
+      owner: "{{ cntr_k8_003240 | ternary('root',omit) }}"
+      group: "{{ cntr_k8_003240 | ternary('root',omit) }}"
+  when:
+      - cntr_k8_003230 or
+        cntr_k8_003240
+  tags:
+      - CNTR-K8-003230
+      - CNTR-K8-003240
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001330
+      - SV-242456r821618_rule
+      - SV-242457r712727_rule
+      - V-242456
+      - V-242457
+      - permissions
+
+- name: "MEDIUM | CNTR-K8-003250 | PATCH | The Kubernetes API Server must have file permissions set to 644 or more restrictive."
+  block:
+      - name: "MEDIUM | CNTR-K8-003250 | AUDIT | The Kubernetes API Server must have file permissions set to 644 or more restrictive. | Get files"
+        shell: find /etc/kubernetes/manifests/ -perm /022 -type f -exec stat -c "%n" '{}' \;
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_003250_files
+
+      - name: "MEDIUM | CNTR-K8-003250 | PATCH | The Kubernetes API Server must have file permissions set to 644 or more restrictive. | Set permissions"
+        file:
+            path: "{{ item }}"
+            mode: 0644
+        with_items:
+            - "{{ cntr_k8_003250_files.stdout_lines }}"
+        when: cntr_k8_003250_files.stdout | length >= 1
+  when:
+      - cntr_k8_003250
+  tags:
+      - CNTR-K8-003250
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001335
+      - SV-242458r754806_rule
+      - V-242458
+      - permissions
+
+- name: "MEDIUM | CNTR-K8-003280 | PATCH | Kubernetes API Server audit logs must be enabled."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003280
+  tags:
+      - CNTR-K8-003280
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001335
+      - SV-242461r712739_rule
+      - V-242461
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-003290 | PATCH | The Kubernetes API Server must be set to audit log max size."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003290
+  tags:
+      - CNTR-K8-003290
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001335
+      - SV-242462r712742_rule
+      - V-242462
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-003300 | PATCH | The Kubernetes API Server must be set to audit log maximum backup."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003300
+  tags:
+      - CNTR-K8-003300
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001335
+      - SV-242463r712745_rule
+      - V-242463
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-003310 | PATCH | The Kubernetes API Server audit log retention must be set."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003310
+  tags:
+      - CNTR-K8-003310
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001335
+      - SV-242464r754808_rule
+      - V-242464
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-003320 | PATCH | The Kubernetes API Server audit log path must be set."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003320
+  tags:
+      - CNTR-K8-003320
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001335
+      - SV-242465r754810_rule
+      - V-242465
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-003340 | PATCH | The Kubernetes PKI keys must have file permissions set to 600 or more restrictive."
+  block:
+      - name: "MEDIUM | CNTR-K8-003340 | PATCH | The Kubernetes PKI keys must have file permissions set to 600 or more restrictive. | Get files"
+        find:
+            path: /etc/kubernetes/pki/
+            patterns: '*.key'
+        register: cntr_k8_003340_pki_key_files
+
+      - name: "MEDIUM | CNTR-K8-003340 | PATCH | The Kubernetes PKI keys must have file permissions set to 600 or more restrictive. | Set permissions"
+        file:
+            path: "{{ item.path }}"
+            mode: 0600
+        with_items:
+            - "{{ cntr_k8_003340_pki_key_files.files }}"
+        loop_control:
+            label: "{{ item.path }}"
+        when: cntr_k8_003340_pki_key_files.matched >= 1
+  when:
+      - cntr_k8_003340
+  tags:
+      - CNTR-K8-003340
+      - CAT2
+      - CCI-000366
+      - SRG-APP-000516-CTR-001335
+      - SV-242467r712757_rule
+      - V-242467
+      - permissions
+
+- name: "MEDIUM | CNTR-K8-003350 | PATCH | The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_003350
+  tags:
+      - CNTR-K8-003350
+      - CAT2
+      - CCI-001453
+      - SRG-APP-000560-CTR-001340
+      - SV-242468r712760_rule
+      - V-242468
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_001300
+  tags:
+      - CNTR-K8-001300
+      - CAT2
+      - CCI-001133
+      - SRG-APP-000190-CTR-000500
+      - SV-245541r821621_rule
+      - V-245541
+      - kubelet
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-002630 | PATCH | Kubernetes API Server must disable token authentication to protect information in transit."
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_002630
+  tags:
+      - CNTR-K8-002630
+      - CAT2
+      - CCI-002418
+      - SRG-APP-000439-CTR-001080
+      - SV-245543r754894_rule
+      - V-245543
+      - kube_api_server
+      - not_implemented_yet
+
+- name: "MEDIUM | CNTR-K8-002640 | PATCH | Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit"
+  shell: /bin/true
+  changed_when: false
+  failed_when: false
+  when:
+      - cntr_k8_002640
+  tags:
+      - CNTR-K8-002640
+      - CAT2
+      - CCI-002418
+      - SRG-APP-000439-CTR-001080
+      - SV-245544r754897_rule
+      - V-245544
+      - kube_api_server
+      - not_implemented_yet

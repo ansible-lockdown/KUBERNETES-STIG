@@ -30,6 +30,16 @@ cntr_k8_001990: true
 cntr_k8_002000: true
 cntr_k8_002010: true
 cntr_k8_002620: true
+
+# CAT 2 Rules
+cntr_k8_000150: true
+cntr_k8_000160: true
+cntr_k8_000170: true
+cntr_k8_000180: true
+cntr_k8_000190: true
+cntr_k8_000270: true
+cntr_k8_000300: true
+cntr_k8_000310: true
 cntr_k8_000350: true
 cntr_k8_000400: true
 cntr_k8_000410: true
@@ -47,16 +57,59 @@ cntr_k8_000880: true
 cntr_k8_000890: true
 cntr_k8_000900: true
 cntr_k8_000910: true
-
-# CAT 2 Rules
-cntr_k8_000150: true
-cntr_k8_000160: true
-cntr_k8_000170: true
-cntr_k8_000180: true
-cntr_k8_000190: true
-cntr_k8_000270: true
-cntr_k8_000300: true
-cntr_k8_000310: true
+cntr_k8_000920: true
+cntr_k8_000930: true
+cntr_k8_000940: true
+cntr_k8_000950: true
+cntr_k8_000960: true
+cntr_k8_001360: true
+cntr_k8_001400: true
+cntr_k8_001410: true
+cntr_k8_001420: true
+cntr_k8_001430: true
+cntr_k8_001440: true
+cntr_k8_001450: true
+cntr_k8_001460: true
+cntr_k8_001470: true
+cntr_k8_001480: true
+cntr_k8_001490: true
+cntr_k8_001500: true
+cntr_k8_001510: true
+cntr_k8_001520: true
+cntr_k8_001530: true
+cntr_k8_001540: true
+cntr_k8_001550: true
+cntr_k8_002600: true
+cntr_k8_002700: true
+cntr_k8_002720: true
+cntr_k8_003110: true
+cntr_k8_003120: true
+cntr_k8_003130: true
+cntr_k8_003140: true
+cntr_k8_003150: true
+cntr_k8_003160: true
+cntr_k8_003170: true
+cntr_k8_003180: true
+cntr_k8_003190: true
+cntr_k8_003200: true
+cntr_k8_003210: true
+cntr_k8_003220: true
+cntr_k8_003230: true
+cntr_k8_003240: true
+cntr_k8_003250: true
+cntr_k8_003260: true
+cntr_k8_003270: true
+cntr_k8_003280: true
+cntr_k8_003290: true
+cntr_k8_003300: true
+cntr_k8_003310: true
+cntr_k8_003320: true
+cntr_k8_003330: true
+cntr_k8_003340: true
+cntr_k8_003350: true
+cntr_k8_001300: true
+cntr_k8_002630: true
+cntr_k8_002640: true
 
 # cntrk8stig_ansible_managed_audit_policy is the toggle allow this role manage the audit-policy file
 # If set to true this will use the template located in templates/audit-policy.yaml.j2 as the audit policy
@@ -81,6 +134,9 @@ etcd_pod_specification_file: "/etc/kubernetes/manifests/etcd.yaml"
 
 # Kubelet
 kubelet_config_file: "/var/lib/kubelet/config.yaml"
+
+cntrk8stig_kubelet_service_file: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+proxy_kubeconfig_file: "/var/lib/kube-proxy/config.conf"
 
 # CAT1 Variables
 
@@ -132,3 +188,13 @@ cntrk8stig_api_server_audit_log_path: "/var/log/kubernetes/audit/audit.log"
 # cntrk8stig_api_version is the latest version of the API to use for the audit policy
 # To conform to STIG standards this needs to match the latest avialable version
 cntrk8stig_api_version: "v1"
+
+# CNTR-K8-001400
+# cntrk8stig_kubeapi_tls_cipher_suites are the cipher suites to be used with the api server config
+# To conform to STIG standards the value of TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 needs to be set
+cntrk8stig_kubeapi_tls_cipher_suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+
+# CNTR-K8-001410
+# cntrk8stig_kubeapi_client_ca_file is the ca certificate file used by teh api server config
+# To confrom to STIG standards please point to a site approved certificate file
+cntrk8stig_kubeapi_client_ca_file: "/etc/srv/kubernetes/pki/ca-certificates.crt"
