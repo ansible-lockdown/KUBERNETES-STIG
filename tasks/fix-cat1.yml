@@ -65,7 +65,7 @@
             cntr_k8_000330_original_kubelet_cfg: "{{ cntr_k8_000330_slurp.content|b64decode|from_yaml }}"
 
       - name: "SHIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Add new value"
-        vars: 
+        vars:
             cntr_k8_000330_new_kubelet_cfg:
                 readOnlyPort: 0
         set_fact:
@@ -75,7 +75,7 @@
       - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Update existing value"
         set_fact:
             cntr_k8_000330_updated_kubelet_cfg: "{{ cntr_k8_000330_original_kubelet_cfg | combine(cntr_k8_000330_updated_kubelet_cfg, recursive=True) }}"
-        vars: 
+        vars:
             cntr_k8_000330_updated_kubelet_cfg:
                 readOnlyPort: 0
         when: cntr_k8_000330_original_kubelet_cfg.readOnlyPort is defined and cntr_k8_000330_original_kubelet_cfg.readOnlyPort != 0
@@ -169,7 +169,7 @@
             cntr_k8_000380_original_kubelet_cfg: "{{ cntr_k8_000380_slurped.content | b64decode | from_yaml }}"
 
       - name: "HIGH | CNTR-K8-000380 | AUDIT | The Kubernetes kubelet must enable explicit authorization. | Add new value"
-        vars: 
+        vars:
             cntr_k8_000380_new_kubelet_cfg:
                 authorization:
                     mode: Webhook
@@ -180,7 +180,7 @@
       - name: "HIGH | CNTR-K8-000380 | AUDIT | The Kubernetes kubelet must enable explicit authorization. | Update existing value"
         set_fact:
             cntr_k8_000380_updated_kubelet_cfg: "{{ cntr_k8_000380_original_kubelet_cfg | combine(cntr_k8_000380_updated_kubelet_cfg, recursive=True) }}"
-        vars: 
+        vars:
             cntr_k8_000380_updated_kubelet_cfg:
                 authorization:
                     mode: Webhook
@@ -235,7 +235,7 @@
                 - "Warning!! You have secrets that are stored as environment variables"
                 - "Please migrate these to secret files to conform to STIG standards"
         when: cntr_k8_001160_secret_env_vars | length >= 1
-      
+
       - name: "HIGH | CNTR-K8-001160 | AUDIT | Secrets in Kubernetes must not be stored as environment variables. | Set warning counter"
         set_fact:
             control_number: "{{ control_number }} + [ 'CNTR-K8-001160' ]"
@@ -264,7 +264,7 @@
             cntr_k8_0162_original_kublet_cfg: "{{ cntr_k8_01620_slurped.content|b64decode|from_yaml }}"
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Add new value"
-        vars: 
+        vars:
             cntr_k8_01620_new_kublet_cfg:
                 protectKernelDefaults: true
         set_fact:
@@ -274,7 +274,7 @@
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Update existing value"
         set_fact:
             cntr_k8_01620_updated_kubelet_cfg: "{{ cntr_k8_0162_original_kublet_cfg | combine(cntr_k8_01620_updated_kubelet_cfg, recursive=True) }}"
-        vars: 
+        vars:
             cntr_k8_01620_updated_kubelet_cfg:
                 protectKernelDefaults: true
         when: cntr_k8_0162_original_kublet_cfg.protectKernelDefaults is defined and cntr_k8_0162_original_kublet_cfg.protectKernelDefaults != true
@@ -328,7 +328,7 @@
       - cntr_k8_002000
       - kubernetes_master
   tags:
-      - CNTR-K8-002000 
+      - CNTR-K8-002000
       - CAT1
       - CCI-002233
       - SRG-APP-000342-CTR-000775

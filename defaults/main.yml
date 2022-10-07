@@ -6,7 +6,7 @@ cntrk8stig_cat2_patch: true
 cntrk8stig_cat3_patch: true
 
 # This variable will either force or prevent a reboot after this role runs. It is best practice to reboot after these Changes
-# however the time you run this role might not be the best time to reboot, so we allow flexability 
+# however the time you run this role might not be the best time to reboot, so we allow flexability
 cntrk8stig_skip_reboot: true
 
 kubernetes_master: true
@@ -176,7 +176,7 @@ cntrk8stig_kube_api_server_secure_port: "6443"
 
 # CNTR-K8-000600
 # cntrk8stig_api_server_audit_policy_file is the path to the audit policy file used by the Kube API Server config
-# To conform to STIG standards this needs to be setup. 
+# To conform to STIG standards this needs to be setup.
 cntrk8stig_api_server_audit_policy_file: "/etc/kubernetes/audit-policy.yaml"
 
 # CNTR-K8-000610

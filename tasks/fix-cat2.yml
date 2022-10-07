@@ -261,13 +261,13 @@
       - cntr_k8_000450
       - kubernetes_master
   tags:
-    - CNTR-K8-000450
-    - CAT2
-    - CCI-000213
-    - SRG-APP-000033-CTR-000100
-    - SV-242398r717019_rule
-    - V-242398
-    - kube_api_server
+      - CNTR-K8-000450
+      - CAT2
+      - CCI-000213
+      - SRG-APP-000033-CTR-000100
+      - SV-242398r717019_rule
+      - V-242398
+      - kube_api_server
 
 - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
   block:
@@ -345,7 +345,7 @@
             split_000470_yaml: |
                 path: >-4
                     \g<path>
-                entry: >-4  
+                entry: >-4
                     \g<entry>
         when: cntr_k8_000470_feature_gates.stdout | length >= 1
 
@@ -1112,7 +1112,7 @@
         changed_when: false
         failed_when: false
         register: cntr_k8_003120_etc_files
-      
+
       - name: |
           "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd."
           "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive."
@@ -1170,7 +1170,7 @@
       owner: "{{ cntr_k8_003130 | ternary('root',omit) }}"
       group: "{{ cntr_k8_003130 | ternary('root',omit) }}"
   with_items:
-      - /etc/kubernetes/admin.conf 
+      - /etc/kubernetes/admin.conf
       - /etc/kubernetes/scheduler.conf
       - /etc/kubernetes/controller-manager.conf
   when:
