@@ -7,7 +7,7 @@ cntrk8stig_cat3_patch: true
 
 # This variable will either force or prevent a reboot after this role runs. It is best practice to reboot after these Changes
 # however the time you run this role might not be the best time to reboot, so we allow flexability 
-cntrk8stig_skip_reboot: false
+cntrk8stig_skip_reboot: true
 
 kubernetes_master: true
 

@@ -223,7 +223,7 @@
         debug:
             msg:
                 - "Warning!! Your version needs to be 1.12.9 or newer"
-        when: cntr_k8_000430_kubectl_client_version.stdout >= 1.12.0
+        when: cntr_k8_000430_kubectl_client_version.stdout | int >= 1.12.0
 
       - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Warning count"
         set_fact:
@@ -685,7 +685,7 @@
 - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)."
   block:
       - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get etcd servers"
-        shell: grep -I -etcd-servers {{ controller_api_server_file }}
+        shell: grep -I -etcd-servers {{ api_server_pod_specification_file }}
         changed_when: false
         failed_when: false
         register: cntr_k8_000950_etcd_servers
@@ -745,7 +745,7 @@
 
 - name: "MEDIUM | CNTR-K8-001400 | PATCH | The Kubernetes API server must use approved cipher suites."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --tls-cipher-suites=.*)$'
       line: "    - --tls-cipher-suites={{ cntrk8stig_kubeapi_tls_cipher_suites }}"
       insertafter: '^\s+- kube-apiserver$'
@@ -764,7 +764,7 @@
 
 - name: "MEDIUM | CNTR-K8-001410 | PATCH | Kubernetes API Server must have the SSL Certificate Authority set."
   lineinfile:
-      path: "{{ controller_api_server_file }}"
+      path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --client-ca-file=.*)$'
       line: "    - --client-ca-file={{ cntrk8stig_kubeapi_client_ca_file }}"
       insertafter: '^\s+- kube-apiserver$'
@@ -1081,7 +1081,6 @@
             path: "/etc/kubernetes/manifests"
             patterns: "*.yaml"
         register: cntr_k8_003110_manifest_files
-      - debug: var=cntr_k8_003110_manifest_files.files
 
       - name: "MEDIUM | CNTR-K8-003110 | PATCH | The Kubernetes component manifests must be owned by root. | Apply root owner"
         file:
@@ -1155,7 +1154,7 @@
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001325
-      = SRG-APP-000516-CTR-001335
+      - SRG-APP-000516-CTR-001335
       - SV-242445r712691_rule
       - SV-242459r712733_rule
       - V-242445
@@ -1166,14 +1165,14 @@
     "MEDIUM | CNTR-K8-003130 | PATCH | The Kubernetes conf files must be owned by root."
     "MEDIUM | CNTR-K8-003270 | PATCH | The Kubernetes admin.conf must have file permissions set to 644 or more restrictive."
   file:
-      path: "{{ items }}"
+      path: "{{ item }}"
       mode: "{{ cntr_k8_003270 | ternary('644',omit) }}"
       owner: "{{ cntr_k8_003130 | ternary('root',omit) }}"
       group: "{{ cntr_k8_003130 | ternary('root',omit) }}"
   with_items:
       - /etc/kubernetes/admin.conf 
       - /etc/kubernetes/scheduler.conf
-      - etc/kubernetes/controller-manager.conf
+      - /etc/kubernetes/controller-manager.conf
   when:
       - cntr_k8_003130 or
         cntr_k8_003270
