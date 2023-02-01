@@ -131,6 +131,9 @@ scheduler_pod_specification_file: "/etc/kubernetes/manifests/kube-scheduler.yaml
 # etcd pod specification file
 etcd_pod_specification_file: "/etc/kubernetes/manifests/etcd.yaml"
 
+# kubelet_file is the path and filename of the kubelet file itself
+kubelet_file: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+
 
 # Kubelet
 kubelet_config_file: "/var/lib/kubelet/config.yaml"
@@ -198,3 +201,40 @@ cntrk8stig_kubeapi_tls_cipher_suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,T
 # cntrk8stig_kubeapi_client_ca_file is the ca certificate file used by teh api server config
 # To confrom to STIG standards please point to a site approved certificate file
 cntrk8stig_kubeapi_client_ca_file: "/etc/srv/kubernetes/pki/ca-certificates.crt"
+
+# CNTR-K8-003280
+# cntrk8stig_kubeapi_audit_policy_file is the path to the audit policy config file
+# This needs to be configured to be STIG compliant
+cntrk8stig_kubeapi_audit_policy_file: "/etc/kubernetes/audit-policy.yaml"
+
+# CNTR-K8-003290
+# cntrk8stig_audit_log_max_size is the largest the audit log can become, value is in megabytes
+# To conform to STIG standards this needs to be 100 or higher
+cntrk8stig_audit_log_max_size: 100
+
+# CNTR-K8-003300
+# cntrk8stig_audit_log_maxbackup is the max number of files the audit log can retain
+# To conform to STIG standards this needs to be 10 or higher
+cntrk8stig_audit_log_maxbackup: 10
+
+# CNTR-K8-003310
+# cntrk8stig_audit_log_maxage is the minimum number of days to retain old audit log files
+# To conform to STIG standards this needs to be 30 or higher
+cntrk8stig_audit_log_maxage: 30
+
+# CNTR-K8-003320
+# cntrk8stig_audit_log_path is the path to the audit log file
+# To conform to STIG standards this needs to point a valid location
+cntrk8stig_audit_log_path: "/var/log/kubernetes/audit/audit.log"
+
+# CNTR-K8-003350
+# cntrk8stig_kube
+
+
+# CNTR-K8-002640
+# cntrk8stig_client_cert is the setting to the certificate used to authenticate the kubelet to the API server
+# To conform to STIG standards this needs to be set to an approved organizational certificate
+cntrk8stig_client_cert: "/etc/kubernetes/pki/kubelet/kubelet.crt"
+# cntrk8stig_client_key the path to the private key file used to authenticate the kubelet to the API server
+# Ton conform to STIG standards this needs to be set to an approved organizational key pair
+cntrk8stig_client_key: "/etc/kubernetes/pki/kubelet/kubelet.key"

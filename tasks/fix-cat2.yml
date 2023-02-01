@@ -37,7 +37,9 @@
       - V-242377
       - kube_scheduler
 
-- name: "MEDIUM | CNTR-K8-000170 | PATCH | The Kubernetes API Server must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+- name: |
+    "MEDIUM | CNTR-K8-000170 | PATCH | The Kubernetes API Server must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+    "MEDIUM | CNTR-K8-003350 | PATCH | The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0."
   lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --tls-min-version.*)$'
@@ -50,9 +52,13 @@
       - CNTR-K8-000170
       - CAT2
       - CCI-000068
+      - CCI-001453
       - SRG-APP-000014-CTR-000040
+      - SRG-APP-000560-CTR-001340
       - SV-242378r712490_rule
+      - SV-242468r712760_rule
       - V-242378
+      - V-242468
       - kube_api_server
 
 - name: "MEDIUM | CNTR-K8-000180 | PATCH | The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination."
@@ -1394,11 +1400,14 @@
       - permissions
 
 - name: "MEDIUM | CNTR-K8-003280 | PATCH | Kubernetes API Server audit logs must be enabled."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --audit-policy-file=.*)$'
+      line: "    - --audit-policy-file={{ cntrk8stig_kubeapi_audit_policy_file }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003280
+      - kubernetes_master
   tags:
       - CNTR-K8-003280
       - CAT2
@@ -1407,14 +1416,16 @@
       - SV-242461r712739_rule
       - V-242461
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-003290 | PATCH | The Kubernetes API Server must be set to audit log max size."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --audit-log-maxsize=.*)$'
+      line: "    - --audit-log-maxsize={{ cntrk8stig_audit_log_max_size }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003290
+      - kubernetes_master
   tags:
       - CNTR-K8-003290
       - CAT2
@@ -1423,14 +1434,16 @@
       - SV-242462r712742_rule
       - V-242462
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-003300 | PATCH | The Kubernetes API Server must be set to audit log maximum backup."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --audit-log-maxbackup=.*)$'
+      line: "    - --audit-log-maxbackup={{ cntrk8stig_audit_log_maxbackup }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003300
+      - kubernetes_master
   tags:
       - CNTR-K8-003300
       - CAT2
@@ -1439,14 +1452,16 @@
       - SV-242463r712745_rule
       - V-242463
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-003310 | PATCH | The Kubernetes API Server audit log retention must be set."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --audit-log-maxage=.*)$'
+      line: "    - --audit-log-maxage={{ cntrk8stig_audit_log_maxage }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003310
+      - kubernetes_master
   tags:
       - CNTR-K8-003310
       - CAT2
@@ -1455,14 +1470,16 @@
       - SV-242464r754808_rule
       - V-242464
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-003320 | PATCH | The Kubernetes API Server audit log path must be set."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --audit-log-path=.*)$'
+      line: "    - --audit-log-path={{ cntrk8stig_audit_log_path }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003320
+      - kubernetes_master
   tags:
       - CNTR-K8-003320
       - CAT2
@@ -1471,7 +1488,6 @@
       - SV-242465r754810_rule
       - V-242465
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-003340 | PATCH | The Kubernetes PKI keys must have file permissions set to 600 or more restrictive."
   block:
@@ -1502,11 +1518,14 @@
       - permissions
 
 - name: "MEDIUM | CNTR-K8-003350 | PATCH | The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --tls-min-version=.*)$'
+      line: "    - --tls-min-version={{ cntrk8stig_audit_log_path }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003350
+      - kubernetes_master
   tags:
       - CNTR-K8-003350
       - CAT2
@@ -1523,6 +1542,7 @@
   failed_when: false
   when:
       - cntr_k8_001300
+      - kubernetes_master
   tags:
       - CNTR-K8-001300
       - CAT2
@@ -1534,11 +1554,13 @@
       - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-002630 | PATCH | Kubernetes API Server must disable token authentication to protect information in transit."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --token-auth-file=.*)$'
+      state: absent
   when:
       - cntr_k8_002630
+      - kubernetes_master
   tags:
       - CNTR-K8-002630
       - CAT2
@@ -1546,15 +1568,21 @@
       - SRG-APP-000439-CTR-001080
       - SV-245543r754894_rule
       - V-245543
-      - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-002640 | PATCH | Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit"
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      insertafter: '^\s+- kube-apiserver'
+  with_items:
+      - { regexp: '^(\s+- --kubelet-client-certificate=.*)$', line: "    - --kubelet-client-certificate={{ cntrk8stig_client_cert }}" }
+      - { regexp: '^(\s+- --kubelet-client-key=.*)$', line: "    - --kubelet-client-key={{ cntrk8stig_client_key }}" }
+  loop_control:
+      label: "{{ item.line }}"
   when:
       - cntr_k8_002640
+      - kubernetes_master
   tags:
       - CNTR-K8-002640
       - CAT2
