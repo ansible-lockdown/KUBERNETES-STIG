@@ -230,6 +230,10 @@ cntrk8stig_audit_log_path: "/var/log/kubernetes/audit/audit.log"
 # CNTR-K8-003350
 # cntrk8stig_kube
 
+# CNTR-K8-001300
+# cntrk8stig_stream_conn_idle_timeout is the Streaming Connection Idle Timeout value.
+# To conform to STIG standards this should never be set to zero and practice should have it set to at most 5m
+cntrk8stig_stream_conn_idle_timeout: "5m"
 
 # CNTR-K8-002640
 # cntrk8stig_client_cert is the setting to the certificate used to authenticate the kubelet to the API server

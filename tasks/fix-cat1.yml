@@ -78,7 +78,9 @@
         vars:
             cntr_k8_000330_updated_kubelet_cfg:
                 readOnlyPort: 0
-        when: cntr_k8_000330_original_kubelet_cfg.readOnlyPort is defined and cntr_k8_000330_original_kubelet_cfg.readOnlyPort != 0
+        when:
+            - cntr_k8_000330_original_kubelet_cfg.readOnlyPort is defined
+            - cntr_k8_000330_original_kubelet_cfg.readOnlyPort != 0
 
       - name: "HIGH | CNTR-K8-000330 | PATCH | The Kubernetes Kubelet must have the read-only port flag disabled. | Verify that the --read-only-port argument is set to 0"
         copy:
@@ -236,10 +238,10 @@
                 - "Please migrate these to secret files to conform to STIG standards"
         when: cntr_k8_001160_secret_env_vars | length >= 1
 
-      - name: "HIGH | CNTR-K8-001160 | AUDIT | Secrets in Kubernetes must not be stored as environment variables. | Set warning counter"
-        set_fact:
-            control_number: "{{ control_number }} + [ 'CNTR-K8-001160' ]"
-            warn_count: "{{ warn_count | int + 1 }}"
+      - name: "HIGH | CNTR-K8-001160 | AUDIT | Secrets in Kubernetes must not be stored as environment variables. | Set warning count"
+        ansible.builtin.import_tasks: warning_facts.yml
+        vars:
+            warn_control_id: 'CNTR-K8-001160'
         when: cntr_k8_001160_secret_env_vars | length >= 1
   when:
       - cntr_k8_001160
@@ -277,7 +279,9 @@
         vars:
             cntr_k8_01620_updated_kubelet_cfg:
                 protectKernelDefaults: true
-        when: cntr_k8_0162_original_kublet_cfg.protectKernelDefaults is defined and cntr_k8_0162_original_kublet_cfg.protectKernelDefaults != true
+        when:
+            - cntr_k8_0162_original_kublet_cfg.protectKernelDefaults is defined
+            - cntr_k8_0162_original_kublet_cfg.protectKernelDefaults
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Ensure that the --protect-kernel-defaults argument is set to true"
         copy:

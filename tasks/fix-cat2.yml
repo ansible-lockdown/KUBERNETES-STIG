@@ -229,13 +229,13 @@
         debug:
             msg:
                 - "Warning!! Your version needs to be 1.12.9 or newer"
-        when: cntr_k8_000430_kubectl_client_version.stdout | int >= 1.12.0
+        when: cntr_k8_000430_kubectl_client_version.stdout is version('1.12.0', '<=')
 
       - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Warning count"
-        set_fact:
-            control_number: "{{ control_number }} + [ 'CNTR-K8-000430' ]"
-            warn_count: "{{ warn_count | int + 1 }}"
-        when: cntr_k8_000430_kubectl_client_version.stdout >= 1.12.0
+        ansible.builtin.import_tasks: warning_facts.yml
+        vars:
+            warn_control_id: 'CNTR-K8-000430'
+        when: cntr_k8_000430_kubectl_client_version.stdout is version('1.12.0', '<=')
   when:
       - cntr_k8_000430
   tags:
@@ -599,6 +599,11 @@
                 - "{{ (cntr_k8_000920_etcd_servers.stdout | length >= 1) | ternary(cntr_k8_000920_etcd_servers.stdout_lines,'Not Configured') }}"
                 - "Your namespace:"
                 - "{{ (cntr_k8_000920_name_space.stdout | length >= 1) | ternary(cntr_k8_000920_name_space.stdout_lines,'Not Configured') }}"
+
+      - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Warn count"
+        ansible.builtin.import_tasks: warning_facts.yml
+        vars:
+            warn_control_id: 'CNTR-K8-000920'
   when:
       - cntr_k8_000920
       - kubernetes_master
@@ -642,6 +647,11 @@
                 - "{{ (cntr_k8_000930_secure_port.stdout | length >= 1) | ternary(cntr_k8_000930_secure_port.stdout_lines,'Not Configured') }}"
                 - "Your name space:"
                 - "{{ (cntr_k8_000930_name_space.stdout | length >= 1) | ternary(cntr_k8_000930_name_space.stdout_lines,'Not Configured') }}"
+
+      - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Warn count"
+        ansible.builtin.import_tasks: warning_facts.yml
+        vars:
+            warn_control_id: 'CNTR-K8-000930'
   when:
       - cntr_k8_000930
       - kubernetes_master
@@ -676,6 +686,11 @@
                 - "Your secure port(s):"
                 - "{{ (cntr_k8_000940_secure_port.stdout | length >= 1) | ternary(cntr_k8_000940_secure_port.stdout_lines,'Not Configured') }}"
                 - "Your namespace:"
+
+      - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Warn count"
+        ansible.builtin.import_tasks: warning_facts.yml
+        vars:
+            warn_control_id: 'CNTR-K8-000940'
   when:
       - cntr_k8_000940
       - kubernetes_master
@@ -703,6 +718,11 @@
                 - To conform to STIG standards these need to conform to PPSM CAL standards"
                 - "Your etcd servers:"
                 - "{{ (cntr_k8_000950_etcd_servers.stdout | length >=1) | ternary(cntr_k8_000950_etcd_servers.stdout_lines,'Not Configured') }}"
+
+      - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Warn count"
+        ansible.builtin.import_tasks: warning_facts.yml
+        vars:
+            warn_control_id: 'CNTR-K8-000940'
   when:
       - cntr_k8_000950
       - kubernetes_master
@@ -1066,10 +1086,10 @@
             msg:
                 - "Warning!! Please make sure you are on version 1.16.7 or newer"
 
-      - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. | Set counter"
-        set_fact:
-            control_number: "{{ control_number }} + ['CNTR-K8-002720']"
-            warn_count: "{{ warn_count | int + 1 }}"
+      - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. | Warn count"
+        ansible.builtin.import_tasks: warning_facts.yml
+        vars:
+            warn_control_id: 'CNTR-K8-002720'
   when:
       - cntr_k8_002720
   tags:
@@ -1554,13 +1574,14 @@
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set variable for correct var"
         ansible.builtin.set_fact:
-            cntr_k8_001300_strm_con_idle_timeout_status: "{{ cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout is defined | ternary(cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout,cntr_k8_001300_strm_con_idle_timeout_status_kubelet.stdout) }}"
+            cntr_k8_001300_strm_con_idle_timeout_status: "{{ cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout is defined | ternary(cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout, cntr_k8_001300_strm_con_idle_timeout_status_kubelet.stdout) }}"
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if both EXRA_ARGS and streaming connection exist"
         ansible.builtin.replace:
             path: "{{ kubelet_file }}"
             regexp: 'streaming-connection-idle-timeout=([\S])([^"])'
             replace: streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}
+        notify: kubelet restart
         when:
             - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
             - "'streaming-connection-idle-timeout' in cntr_k8_001300_strm_con_idle_timeout_status"
@@ -1570,6 +1591,7 @@
             path: "{{ kubelet_file }}"
             regexp: 'KUBELET_EXTRA_ARGS='
             replace: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }} '
+        notify: kubelet restart
         when:
             - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
             - "'streaming-connection-idle-timeout' not in cntr_k8_001300_strm_con_idle_timeout_status"
@@ -1578,6 +1600,7 @@
         ansible.builtin.lineinfile:
             path: "{{ kubelet_file }}"
             line: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}'
+        notify: kubelet restart
         when:
             - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
             - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
@@ -1587,6 +1610,7 @@
             path: "{{ kubelet_file }}"
             line: 'Environment="KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout=5m"'
             insertafter: '\[Service\]'
+        notify: kubelet restart
         when:
             - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
