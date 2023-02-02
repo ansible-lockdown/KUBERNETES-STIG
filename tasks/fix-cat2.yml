@@ -1537,9 +1537,59 @@
       - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  block:
+      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Get parameter status if systemd"
+        ansible.builtin.shell: grep -is '[^\s]."KUBELET_EXTRA_ARGS' {{ kubelet_file }} | sed -n 's/.*"\(.*\)".*/\1/p'
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_001300_strm_con_idle_timeout_status_sysd
+        when: "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
+
+      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Get parameter status if kubelet file"
+        ansible.builtin.shell: grep -is '^KUBELET_EXTRA_ARGS' {{ kubelet_file }}
+        changed_when: false
+        failed_when: false
+        register: cntr_k8_001300_strm_con_idle_timeout_status_kubelet
+        when: "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
+
+      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set variable for correct var"
+        ansible.builtin.set_fact:
+            cntr_k8_001300_strm_con_idle_timeout_status: "{{ cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout is defined | ternary(cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout,cntr_k8_001300_strm_con_idle_timeout_status_kubelet.stdout) }}"
+
+      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if both EXRA_ARGS and streaming connection exist"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'streaming-connection-idle-timeout=([\S])([^"])'
+            replace: streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'streaming-connection-idle-timeout' in cntr_k8_001300_strm_con_idle_timeout_status"
+
+      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS exist and not streaming connection"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'KUBELET_EXTRA_ARGS='
+            replace: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }} '
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'streaming-connection-idle-timeout' not in cntr_k8_001300_strm_con_idle_timeout_status"
+
+      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS don't exist for non-systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}'
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
+
+      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS don't exist for systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'Environment="KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout=5m"'
+            insertafter: '\[Service\]'
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001300
       - kubernetes_master
