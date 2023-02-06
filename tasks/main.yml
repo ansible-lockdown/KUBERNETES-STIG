@@ -1,41 +1,34 @@
 ---
 
-- name: Gather the package facts before prelim
-  package_facts:
-      manager: auto
-  tags:
-      - always
-
-# - import_tasks: prelim.yml
-#   tags:
-#       - always
-
-- name: Gather package facts after prelim
-  package_facts:
+- name: Gather the package facts
+  ansible.builtin.package_facts:
       manager: auto
   tags:
       - always
 
 - name: Include CAT I patches
-  import_tasks: fix-cat1.yml
-  when: cntrk8stig_cat1_patch
+  ansible.builtin.import_tasks: fix-cat1.yml
+  when:
+      - cntrk8stig_cat1_patch
   tags:
       - cat1
       - high
 
 - name: Include CAT I patches
-  import_tasks: fix-cat2.yml
-  when: cntrk8stig_cat1_patch
+  ansible.builtin.import_tasks: fix-cat2.yml
+  when:
+      - cntrk8stig_cat1_patch
   tags:
       - cat2
       - medium
 
 - name: flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Display warning counts and related control IDs
-  debug:
+  ansible.builtin.debug:
       msg: "You have {{ warn_count }} Warning(s) that require investigation that are related to the following control ID(s): {{ warn_control_list }}"
-  when: warn_count != 0
+  when:
+      - warn_count != 0
   tags:
       - always
