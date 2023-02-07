@@ -1,0 +1,6 @@
+---
+
+- name: kubelet restart
+  ansible.builtin.systemd:
+      name: kubelet
+      state: restarted

@@ -1,0 +1,293 @@
+---
+
+# The three variables below will skip whole sections of benchmarks. A value of true will run the section, false will skip
+cntrk8stig_cat1_patch: true
+cntrk8stig_cat2_patch: true
+cntrk8stig_cat3_patch: true
+
+# This variable will either force or prevent a reboot after this role runs. It is best practice to reboot after these Changes
+# however the time you run this role might not be the best time to reboot, so we allow flexability
+cntrk8stig_skip_reboot: true
+
+kubernetes_master: true
+
+# These variables correspond with the STIG IDs defined in the STIG and allows you to enable/disable specific rules.
+# PLEASE NOTE: These work in coordination with the cat1, cat2, cat3 group variables. You must enable an entire group
+# in order for the variables below to take effect.
+# CAT 1 rules
+cntr_k8_000220: true
+cntr_k8_000290: true
+cntr_k8_000320: true
+cntr_k8_000330: true
+cntr_k8_000340: true
+cntr_k8_000360: true
+cntr_k8_000370: true
+cntr_k8_000380: true
+cntr_k8_000440: true
+cntr_k8_001160: true
+cntr_k8_001620: true
+cntr_k8_001990: true
+cntr_k8_002000: true
+cntr_k8_002010: true
+cntr_k8_002620: true
+
+# CAT 2 Rules
+cntr_k8_000150: true
+cntr_k8_000160: true
+cntr_k8_000170: true
+cntr_k8_000180: true
+cntr_k8_000190: true
+cntr_k8_000270: true
+cntr_k8_000300: true
+cntr_k8_000310: true
+cntr_k8_000350: true
+cntr_k8_000400: true
+cntr_k8_000410: true
+cntr_k8_000420: true
+cntr_k8_000430: true
+cntr_k8_000450: true
+cntr_k8_000460: true
+cntr_k8_000470: true
+cntr_k8_000600: true
+cntr_k8_000610: true
+cntr_k8_000700: true
+cntr_k8_000850: true
+cntr_k8_000860: true
+cntr_k8_000880: true
+cntr_k8_000890: true
+cntr_k8_000900: true
+cntr_k8_000910: true
+cntr_k8_000920: true
+cntr_k8_000930: true
+cntr_k8_000940: true
+cntr_k8_000950: true
+cntr_k8_000960: true
+cntr_k8_001360: true
+cntr_k8_001400: true
+cntr_k8_001410: true
+cntr_k8_001420: true
+cntr_k8_001430: true
+cntr_k8_001440: true
+cntr_k8_001450: true
+cntr_k8_001460: true
+cntr_k8_001470: true
+cntr_k8_001480: true
+cntr_k8_001490: true
+cntr_k8_001500: true
+cntr_k8_001510: true
+cntr_k8_001520: true
+cntr_k8_001530: true
+cntr_k8_001540: true
+cntr_k8_001550: true
+cntr_k8_002600: true
+cntr_k8_002700: true
+cntr_k8_002720: true
+cntr_k8_003110: true
+cntr_k8_003120: true
+cntr_k8_003130: true
+cntr_k8_003140: true
+cntr_k8_003150: true
+cntr_k8_003160: true
+cntr_k8_003170: true
+cntr_k8_003180: true
+cntr_k8_003190: true
+cntr_k8_003200: true
+cntr_k8_003210: true
+cntr_k8_003220: true
+cntr_k8_003230: true
+cntr_k8_003240: true
+cntr_k8_003250: true
+cntr_k8_003260: true
+cntr_k8_003270: true
+cntr_k8_003280: true
+cntr_k8_003290: true
+cntr_k8_003300: true
+cntr_k8_003310: true
+cntr_k8_003320: true
+cntr_k8_003330: true
+cntr_k8_003340: true
+cntr_k8_003350: true
+cntr_k8_001300: true
+cntr_k8_002630: true
+cntr_k8_002640: true
+
+# cntrk8stig_ansible_managed_audit_policy is the toggle allow this role manage the audit-policy file
+# If set to true this will use the template located in templates/audit-policy.yaml.j2 as the audit policy
+# The path and filename to be used is in var cntrk8stig_api_server_audit_policy_file
+cntrk8stig_ansible_managed_audit_policy: true
+
+# API Server pod specification file
+api_server_pod_specification_file: "/etc/kubernetes/manifests/kube-apiserver.yaml"
+
+# Controller Manager pod specification file
+# Path and filename of the controller manager configuration file
+controller_manager_pod_specification_file: "/etc/kubernetes/manifests/kube-controller-manager.yaml"
+# value to set the use_service_account_credentials value. To conform to STIG standards this needs to be set to true
+use_service_account_credentials: "true"
+
+# Scheduler pod specification file
+scheduler_pod_specification_file: "/etc/kubernetes/manifests/kube-scheduler.yaml"
+
+# etcd pod specification file
+etcd_pod_specification_file: "/etc/kubernetes/manifests/etcd.yaml"
+
+# kubelet_file is the path and filename of the kubelet file itself
+kubelet_file: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+
+
+# Kubelet
+kubelet_config_file: "/var/lib/kubelet/config.yaml"
+
+cntrk8stig_kubelet_service_file: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+proxy_kubeconfig_file: "/var/lib/kube-proxy/config.conf"
+
+# CAT1 Variables
+
+# CNTR-K8-001990
+# cntrk8stig_kubeapi_auth_mode is the authorization mode for API authentication
+# To conform to STIG standards this should not be set to AlwaysAllow, any other valid authentication value is acceptable
+# Valid options are: ABAC, RBAC, Webhook, Node, and AlwaysDeny
+cntrk8stig_kubeapi_auth_mode: "Webhook"
+
+# CNTR-K8-002000
+# cntrk8stig_kubeapi_enable_admission_plugins are the admission plugins in the api config
+# To conform to STIG standards the ValidatingAdmissionWebhook value needs to be in the list
+# The list needs to be a comma seperated list if you want to include more than ValidatingAdmissionWebhook
+cntrk8stig_kubeapi_enable_admission_plugins: "ValidatingAdmissionWebhook"
+
+# CAT2 Variables
+
+# CNTR-K8-000150
+# cntrk8stig_kube_controller_manager_tls is the SSH TLS protocol to use
+# To confrom to STIG standards this value needs to VersionTLS12 or higher
+cntrk8stig_kube_controller_manager_tls: "VersionTLS12"
+
+# CNTR-K8-000160
+# cntrk8stig_kube_scheduler_manager_tls is the SSH TLS protocol to use
+# To confrom to STIG standards this value needs to VersionTLS12 or higher
+cntrk8stig_kube_scheduler_manager_tls: "VersionTLS12"
+
+# CNTR-K8-000170
+# cntrk8stig_kube_api_server_tls is the SSH TLS protocol to use
+# To confrom to STIG standards this value needs to VersionTLS12 or higher
+cntrk8stig_kube_api_server_tls: "VersionTLS12"
+
+# CNTR-K8-000350
+# cntrk8stig_kube_api_server_secure_port is the api servers secure port number
+# To conform to STIG standards this value needs to be greater than 0
+cntrk8stig_kube_api_server_secure_port: "6443"
+
+# CNTR-K8-000600
+# cntrk8stig_api_server_audit_policy_file is the path to the audit policy file used by the Kube API Server config
+# To conform to STIG standards this needs to be setup.
+cntrk8stig_api_server_audit_policy_file: "/etc/kubernetes/audit-policy.yaml"
+
+# CNTR-K8-000610
+# cntrk8stig_api_server_audit_log_path is the path to the audit logs used by the Kube API Server config
+# To conform to STIG standards this needs to be setup
+cntrk8stig_api_server_audit_log_path: "/var/log/kubernetes/audit/audit.log"
+
+# CNTR-K8-000700
+# cntrk8stig_api_version is the latest version of the API to use for the audit policy
+# To conform to STIG standards this needs to match the latest avialable version
+cntrk8stig_api_version: "v1"
+
+# CNTR-K8-001400
+# cntrk8stig_kubeapi_tls_cipher_suites are the cipher suites to be used with the api server config
+# To conform to STIG standards the value of TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 needs to be set
+cntrk8stig_kubeapi_tls_cipher_suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+
+# CNTR-K8-001410
+# cntrk8stig_kubeapi_client_ca_file is the clinet ca certificate file used by the api server config
+# To confrom to STIG standards please point to a site approved certificate file
+cntrk8stig_kubeapi_client_ca_file: "/etc/kubernetes/pki/apiserver-kubelet-client.crt"
+
+# CNTR-K8-001430
+# cntrk8stig_kubeapi_root_ca_file is the root certificate file used by the api server config
+# To conform to STIG standards please point to a site approved organizational certificate file
+cntrk8stig_kubeapi_root_ca_file: "/etc/srv/kubernetes/pki/root-ca-certificates.crt"
+
+# CNTR-K8-001440
+# CNTR-K8-001460
+# CNTR-K8-001470
+# CNTR-K8-001490
+# cntrk8stig_tls_cert_file is the tls certificate path and file
+# To conform to STIG standards please point to an approved organizational certificate
+cntrk8stig_tls_cert_file: "/etc/kubernetes/pki/apiserver.crt"
+# cntrk8stig_tls_privkey_file is the tls certificates private key path and file
+# to conform to STIG standards please point to an approved organizational certificate
+cntrk8stig_tls_privkey_file: "/etc/kubernetes/pki/apiserver.key"
+
+
+# CNTR-K8-003280
+# cntrk8stig_kubeapi_audit_policy_file is the path to the audit policy config file
+# This needs to be configured to be STIG compliant
+cntrk8stig_kubeapi_audit_policy_file: "/etc/kubernetes/audit-policy.yaml"
+
+# CNTR-K8-003290
+# cntrk8stig_audit_log_max_size is the largest the audit log can become, value is in megabytes
+# To conform to STIG standards this needs to be 100 or higher
+cntrk8stig_audit_log_max_size: 100
+
+# CNTR-K8-003300
+# cntrk8stig_audit_log_maxbackup is the max number of files the audit log can retain
+# To conform to STIG standards this needs to be 10 or higher
+cntrk8stig_audit_log_maxbackup: 10
+
+# CNTR-K8-003310
+# cntrk8stig_audit_log_maxage is the minimum number of days to retain old audit log files
+# To conform to STIG standards this needs to be 30 or higher
+cntrk8stig_audit_log_maxage: 30
+
+# CNTR-K8-003320
+# cntrk8stig_audit_log_path is the path to the audit log file
+# To conform to STIG standards this needs to point a valid location
+cntrk8stig_audit_log_path: "/var/log/kubernetes/audit/audit.log"
+
+# CNTR-K8-003350
+# cntrk8stig_kube
+
+# CNTR-K8-001300
+# cntrk8stig_stream_conn_idle_timeout is the Streaming Connection Idle Timeout value.
+# Make sure to use s,m,h,d after th enumber, so 5 minutes would be a value of 5m
+# To conform to STIG standards this should never be set to zero and practice should have it set to at most 5m
+cntrk8stig_stream_conn_idle_timeout: "5m"
+
+# CNTR-K8-002640
+# cntrk8stig_client_cert is the setting to the certificate used to authenticate the kubelet to the API server
+# To conform to STIG standards this needs to be set to an approved organizational certificate
+cntrk8stig_client_cert: "/etc/kubernetes/pki/kubelet/kubelet.crt"
+# cntrk8stig_client_key the path to the private key file used to authenticate the kubelet to the API server
+# To conform to STIG standards this needs to be set to an approved organizational key pair
+cntrk8stig_client_key: "/etc/kubernetes/pki/kubelet/kubelet.key"
+
+# CNTR-K8-001510
+# cntrk8stig_etcd_catfile is the path to and file name of the etcd root certificate authority file
+# To conform to STIG standards this needs to be set to an approved organizational certificate
+cntrk8stig_etcd_catfile: "/etc/kubernetes/pki/etcd/ca.crt"
+
+# CNTR-K8-001520
+# cntrk8stig_etcd_certfile is the client certificate path and file for authenticating with the etcd server
+# To conform to STIG standards this needs to be set to an approved organizational certificate file
+cntrk8stig_etcd_certfile: "/etc/kubernetes/pki/etcd/kubelet.crt"
+
+# CNTR-K8-001530
+# cntrk8stig_etcd_keyfile is the private key path and file for the client certificate used to authenticate with the etcd server
+# To conform to STIG starndards this needs to be set to an approved organizational key file
+cntrk8stig_etcd_keyfile: "/etc/kubernetes/pki/etcd/kubelet.key"
+
+# CNTR-K8-001540
+# cntrk8stig_etcd_peercert_file is the path and file to the peer certificate in an etcd cluster
+# To conform to STIG standards this needs to be set to an approved organizational certificate
+cntrk8stig_etcd_peercert_file: "/etc/kubernetes/pki/etcd/peer.crt"
+
+# CNTR-K8-001550
+# cntrk8stig_etcd_peerkey_file is the path and file to the peer private key file in an etcd cluster.
+# To conform to STIG standards this needs to be set to an approved organizational key
+cntrk8stig_etcd_peerkey_file: "/etc/kubernetes/pki/etcd/peer.key"
+
+# CNTR-K8-002600
+# cntrk8stig_api_request_timeout is the timeout for client requests to the API server
+# Make sure to use s,m,h,d after th enumber, so 1 minute would be a value of 1m
+# To conform to STIG standards this value needs to be higher than 0
+cntrk8stig_api_request_timeout: "1m"

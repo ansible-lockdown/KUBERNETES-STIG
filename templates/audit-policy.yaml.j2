@@ -1,0 +1,6 @@
+# This file is manageed by the Ansible Lockdown kubernetes STIG automation role
+# Log all requests at the RequestResponse level.
+apiVersion: audit.k8s.io/v{{ cntrk8stig_api_version }}
+kind: Policy
+rules:
+- level: RequestResponse

@@ -1,0 +1,45 @@
+---
+
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+      manager: auto
+  tags:
+      - always
+
+- name: Run preliminary tasks
+  ansible.builtin.import_tasks: prelim.yml
+  when:
+      - cntr_k8_001460 or
+        cntr_k8_001470 or
+        cntr_k8_001300 or
+        cntr_k8_001460
+  tags:
+      - cat2
+      - medium
+
+- name: Include CAT I patches
+  ansible.builtin.import_tasks: fix-cat1.yml
+  when:
+      - cntrk8stig_cat1_patch
+  tags:
+      - cat1
+      - high
+
+- name: Include CAT I patches
+  ansible.builtin.import_tasks: fix-cat2.yml
+  when:
+      - cntrk8stig_cat1_patch
+  tags:
+      - cat2
+      - medium
+
+- name: flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Display warning counts and related control IDs
+  ansible.builtin.debug:
+      msg: "You have {{ warn_count }} Warning(s) that require investigation that are related to the following control ID(s): {{ warn_control_list }}"
+  when:
+      - warn_count != 0
+  tags:
+      - always
