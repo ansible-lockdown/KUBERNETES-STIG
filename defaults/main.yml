@@ -200,7 +200,7 @@ cntrk8stig_kubeapi_tls_cipher_suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,T
 # CNTR-K8-001410
 # cntrk8stig_kubeapi_client_ca_file is the clinet ca certificate file used by the api server config
 # To confrom to STIG standards please point to a site approved certificate file
-cntrk8stig_kubeapi_client_ca_file: "/etc/srv/kubernetes/pki/ca-certificates.crt"
+cntrk8stig_kubeapi_client_ca_file: "/etc/kubernetes/pki/apiserver-kubelet-client.crt"
 
 # CNTR-K8-001430
 # cntrk8stig_kubeapi_root_ca_file is the root certificate file used by the api server config
@@ -279,12 +279,12 @@ cntrk8stig_etcd_keyfile: "/etc/kubernetes/pki/etcd/kubelet.key"
 # CNTR-K8-001540
 # cntrk8stig_etcd_peercert_file is the path and file to the peer certificate in an etcd cluster
 # To conform to STIG standards this needs to be set to an approved organizational certificate
-cntrk8stig_etcd_peercert_file: "/etc/etcd/peer.crt"
+cntrk8stig_etcd_peercert_file: "/etc/kubernetes/pki/etcd/peer.crt"
 
 # CNTR-K8-001550
 # cntrk8stig_etcd_peerkey_file is the path and file to the peer private key file in an etcd cluster.
 # To conform to STIG standards this needs to be set to an approved organizational key
-cntrk8stig_etcd_peerkey_file: "/etc/etcd/peer.key"
+cntrk8stig_etcd_peerkey_file: "/etc/kubernetes/pki/etcd/peer.key"
 
 # CNTR-K8-002600
 # cntrk8stig_api_request_timeout is the timeout for client requests to the API server

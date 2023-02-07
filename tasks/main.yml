@@ -6,6 +6,17 @@
   tags:
       - always
 
+- name: Run preliminary tasks
+  ansible.builtin.import_tasks: prelim.yml
+  when:
+      - cntr_k8_001460 or
+        cntr_k8_001470 or
+        cntr_k8_001300 or
+        cntr_k8_001460
+  tags:
+      - cat2
+      - medium
+
 - name: Include CAT I patches
   ansible.builtin.import_tasks: fix-cat1.yml
   when:

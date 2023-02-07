@@ -219,23 +219,17 @@
 
 - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results."
   block:
-      - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Get Client version"
-        ansible.builtin.shell: kubectl version --short | grep "Client Version" | cut -d"v" -f2
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000430_kubectl_client_version
-
       - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Message out version"
         ansible.builtin.debug:
             msg:
                 - "Warning!! Your version needs to be 1.12.9 or newer"
-        when: cntr_k8_000430_kubectl_client_version.stdout is version('1.12.0', '<=')
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.12.0', '<=')
 
       - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Warning count"
         ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'CNTR-K8-000430'
-        when: cntr_k8_000430_kubectl_client_version.stdout is version('1.12.0', '<=')
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.12.0', '<=')
   when:
       - cntr_k8_000430
   tags:
@@ -453,7 +447,7 @@
   notify: kubelet restart
   when:
       - cntr_k8_000850
-      - cntr_k8_000850_kublet_status.stat.exists
+      - "'/etc/sysconfig/kubelet' in kubelet_file"
   tags:
       - CNTR-K8-000850
       - CAT2
@@ -512,9 +506,8 @@
       - name: |
           "MEDIUM | CNTR-K8-000880 | AUDIT | The Kubernetes kubelet configuration file must be owned by root. | Get file status"
           "MEDIUM | CNTR-K8-000890 | AUDIT | The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive. | Get file status"
-        ansible.builtin.find:
-            path: /etc/sysconfig
-            patterns: kubelet
+        ansible.builtin.stat:
+            path: /etc/sysconfig/kubelet
         register: cntr_k8_000880_kubelet_file_status
 
       - name: |
@@ -525,7 +518,7 @@
             mode: "{{ cntr_k8_000890 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_000880 | ternary('root',omit) }}"
             group: "{{ cntr_k8_000880 | ternary('root',omit) }}"
-        when: cntr_k8_000880_kubelet_file_status.matched >= 1
+        when: cntr_k8_000880_kubelet_file_status.stat.exists
   when:
       - cntr_k8_000880 or
         cntr_k8_000890
@@ -921,7 +914,6 @@
   when:
       - cntr_k8_001460
       - kubernetes_master
-      - cntrk8stig_kublet_file_exists.stat.exists
   tags:
       - CNTR-K8-001460
       - CAT2
@@ -1170,11 +1162,13 @@
         ansible.builtin.debug:
             msg:
                 - "Warning!! Please make sure you are on version 1.16.7 or newer"
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.16.7', '<=')
 
       - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. | Warn count"
         ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'CNTR-K8-002720'
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.16.7', '<=')
   when:
       - cntr_k8_002720
   tags:
@@ -1194,7 +1188,7 @@
         register: cntr_k8_003110_manifest_files
 
       - name: "MEDIUM | CNTR-K8-003110 | PATCH | The Kubernetes component manifests must be owned by root. | Apply root owner"
-        ansible.builtin.find:
+        ansible.builtin.file:
             path: "{{ item.path }}"
             owner: root
         with_items:
