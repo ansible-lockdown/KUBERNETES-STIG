@@ -1,6 +1,5 @@
 # Kubernetes DISA STIG
 
-
 Configure a Kubernetes install to be DISA STIG compliant. All findings will be audited by default. Non-disruptive CAT I, CAT II, and CAT III findings will be corrected by default. Disruptive finding remediation can be enabled by setting `cntrk8stig_disruption_high` to `yes`.
 
 This role is based on Kubernetes DISA STIG: [Version 1, Rel 6 released on  Jul 27, 2022](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R6_STIG.zip).
@@ -80,7 +79,6 @@ tags:
 - **reports** - This is a protected branch for our scoring reports, no code should ever go here
 - **gh_pages** - github pages
 - **all other branches** - Individual community member branches
-
 
 ## Community Contribution
 
