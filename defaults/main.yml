@@ -198,9 +198,26 @@ cntrk8stig_api_version: "v1"
 cntrk8stig_kubeapi_tls_cipher_suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
 
 # CNTR-K8-001410
-# cntrk8stig_kubeapi_client_ca_file is the ca certificate file used by teh api server config
+# cntrk8stig_kubeapi_client_ca_file is the clinet ca certificate file used by the api server config
 # To confrom to STIG standards please point to a site approved certificate file
-cntrk8stig_kubeapi_client_ca_file: "/etc/srv/kubernetes/pki/ca-certificates.crt"
+cntrk8stig_kubeapi_client_ca_file: "/etc/kubernetes/pki/apiserver-kubelet-client.crt"
+
+# CNTR-K8-001430
+# cntrk8stig_kubeapi_root_ca_file is the root certificate file used by the api server config
+# To conform to STIG standards please point to a site approved organizational certificate file
+cntrk8stig_kubeapi_root_ca_file: "/etc/srv/kubernetes/pki/root-ca-certificates.crt"
+
+# CNTR-K8-001440
+# CNTR-K8-001460
+# CNTR-K8-001470
+# CNTR-K8-001490
+# cntrk8stig_tls_cert_file is the tls certificate path and file
+# To conform to STIG standards please point to an approved organizational certificate
+cntrk8stig_tls_cert_file: "/etc/kubernetes/pki/apiserver.crt"
+# cntrk8stig_tls_privkey_file is the tls certificates private key path and file
+# to conform to STIG standards please point to an approved organizational certificate
+cntrk8stig_tls_privkey_file: "/etc/kubernetes/pki/apiserver.key"
+
 
 # CNTR-K8-003280
 # cntrk8stig_kubeapi_audit_policy_file is the path to the audit policy config file
@@ -232,6 +249,7 @@ cntrk8stig_audit_log_path: "/var/log/kubernetes/audit/audit.log"
 
 # CNTR-K8-001300
 # cntrk8stig_stream_conn_idle_timeout is the Streaming Connection Idle Timeout value.
+# Make sure to use s,m,h,d after th enumber, so 5 minutes would be a value of 5m
 # To conform to STIG standards this should never be set to zero and practice should have it set to at most 5m
 cntrk8stig_stream_conn_idle_timeout: "5m"
 
@@ -240,5 +258,36 @@ cntrk8stig_stream_conn_idle_timeout: "5m"
 # To conform to STIG standards this needs to be set to an approved organizational certificate
 cntrk8stig_client_cert: "/etc/kubernetes/pki/kubelet/kubelet.crt"
 # cntrk8stig_client_key the path to the private key file used to authenticate the kubelet to the API server
-# Ton conform to STIG standards this needs to be set to an approved organizational key pair
+# To conform to STIG standards this needs to be set to an approved organizational key pair
 cntrk8stig_client_key: "/etc/kubernetes/pki/kubelet/kubelet.key"
+
+# CNTR-K8-001510
+# cntrk8stig_etcd_catfile is the path to and file name of the etcd root certificate authority file
+# To conform to STIG standards this needs to be set to an approved organizational certificate
+cntrk8stig_etcd_catfile: "/etc/kubernetes/pki/etcd/ca.crt"
+
+# CNTR-K8-001520
+# cntrk8stig_etcd_certfile is the client certificate path and file for authenticating with the etcd server
+# To conform to STIG standards this needs to be set to an approved organizational certificate file
+cntrk8stig_etcd_certfile: "/etc/kubernetes/pki/etcd/kubelet.crt"
+
+# CNTR-K8-001530
+# cntrk8stig_etcd_keyfile is the private key path and file for the client certificate used to authenticate with the etcd server
+# To conform to STIG starndards this needs to be set to an approved organizational key file
+cntrk8stig_etcd_keyfile: "/etc/kubernetes/pki/etcd/kubelet.key"
+
+# CNTR-K8-001540
+# cntrk8stig_etcd_peercert_file is the path and file to the peer certificate in an etcd cluster
+# To conform to STIG standards this needs to be set to an approved organizational certificate
+cntrk8stig_etcd_peercert_file: "/etc/kubernetes/pki/etcd/peer.crt"
+
+# CNTR-K8-001550
+# cntrk8stig_etcd_peerkey_file is the path and file to the peer private key file in an etcd cluster.
+# To conform to STIG standards this needs to be set to an approved organizational key
+cntrk8stig_etcd_peerkey_file: "/etc/kubernetes/pki/etcd/peer.key"
+
+# CNTR-K8-002600
+# cntrk8stig_api_request_timeout is the timeout for client requests to the API server
+# Make sure to use s,m,h,d after th enumber, so 1 minute would be a value of 1m
+# To conform to STIG standards this value needs to be higher than 0
+cntrk8stig_api_request_timeout: "1m"

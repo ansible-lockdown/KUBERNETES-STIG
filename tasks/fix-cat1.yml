@@ -1,7 +1,7 @@
 ---
 
 - name: "HIGH | CNTR-K8-000220 | PATCH | The Kubernetes Controller Manager must create unique service accounts for each work payload."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ controller_manager_pod_specification_file }}"
       regexp: '^(\s+- --use-service-account-credentials=).*$'
       line: '    - --use-service-account-credentials={{ use_service_account_credentials }}'
@@ -21,7 +21,7 @@
       - account_credentials
 
 - name: "HIGH | CNTR-K8-000290 | PATCH | User-managed resources must be created in dedicated namespaces."
-  shell: /bin/true
+  ansible.builtin.shell: /bin/true
   changed_when: false
   failed_when: false
   when:
@@ -35,7 +35,7 @@
       - V-242383
 
 - name: "HIGH | CNTR-K8-000320 | PATCH | The Kubernetes API server must have the insecure port flag disabled."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --insecure-port=).*$'
       line: '    - --secure-port=0'
@@ -56,24 +56,24 @@
 - name: "HIGH | CNTR-K8-000330 | PATCH | The Kubernetes Kubelet must have the read-only port flag disabled."
   block:
       - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled.| Slurp file {{ kubelet_config_file }}"
-        slurp:
+        ansible.builtin.slurp:
             src: "{{ kubelet_config_file }}"
         register: cntr_k8_000330_slurp
 
       - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Convert to dictionary"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_000330_original_kubelet_cfg: "{{ cntr_k8_000330_slurp.content|b64decode|from_yaml }}"
 
       - name: "SHIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Add new value"
         vars:
             cntr_k8_000330_new_kubelet_cfg:
                 readOnlyPort: 0
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_000330_updated_kubelet_cfg: "{{ cntr_k8_000330_original_kubelet_cfg | combine(cntr_k8_000330_new_kubelet_cfg) }}"
         when: cntr_k8_000330_original_kubelet_cfg.readOnlyPort is not defined
 
       - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Update existing value"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_000330_updated_kubelet_cfg: "{{ cntr_k8_000330_original_kubelet_cfg | combine(cntr_k8_000330_updated_kubelet_cfg, recursive=True) }}"
         vars:
             cntr_k8_000330_updated_kubelet_cfg:
@@ -83,7 +83,7 @@
             - cntr_k8_000330_original_kubelet_cfg.readOnlyPort != 0
 
       - name: "HIGH | CNTR-K8-000330 | PATCH | The Kubernetes Kubelet must have the read-only port flag disabled. | Verify that the --read-only-port argument is set to 0"
-        copy:
+        ansible.builtin.copy:
             content: '{{ cntr_k8_000330_updated_kubelet_cfg | to_nice_yaml }}'
             dest: "{{ kubelet_config_file }}"
             backup: true
@@ -103,7 +103,7 @@
       - kubelet
 
 - name: "HIGH | CNTR-K8-000340 | PATCH | The Kubernetes API server must have the insecure bind address not set."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^\s+- --insecure-bind-address=.*'
       state: absent
@@ -121,7 +121,7 @@
       - api_server
 
 - name: "HIGH | CNTR-K8-000360 | PATCH | The Kubernetes API server must have anonymous authentication disabled."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --anonymous-auth=.*)$'
       line: "    - --anonymous-auth=false"
@@ -140,7 +140,7 @@
       - api_server
 
 - name: "HIGH | CNTR-K8-000370 | PATCH | The Kubernetes Kubelet must have anonymous authentication disabled."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ kubelet_config_file }}"
       regexp: '^(\s+- --anonymous-auth=.*)$'
       line: "    - --anonymous-auth=false"
@@ -162,25 +162,25 @@
 - name: "HIGH | CNTR-K8-000380 | PATCH | The Kubernetes kubelet must enable explicit authorization."
   block:
       - name: "HIGH | CNTR-K8-000380 | AUDIT | The Kubernetes kubelet must enable explicit authorization.| Slurp file {{ kubelet_config_file }}"
-        slurp:
+        ansible.builtin.slurp:
             src: "{{ kubelet_config_file }}"
         register: cntr_k8_000380_slurped
 
       - name: "HIGH | CNTR-K8-000380 | AUDIT | The Kubernetes kubelet must enable explicit authorization. | Convert to dictionary"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_000380_original_kubelet_cfg: "{{ cntr_k8_000380_slurped.content | b64decode | from_yaml }}"
 
       - name: "HIGH | CNTR-K8-000380 | AUDIT | The Kubernetes kubelet must enable explicit authorization. | Add new value"
+        ansible.builtin.set_fact:
+            cntr_k8_000380_updated_kubelet_cfg: "{{ cntr_k8_000380_original_kubelet_cfg | combine(cntr_k8_000380_new_kubelet_cfg) }}"
         vars:
             cntr_k8_000380_new_kubelet_cfg:
                 authorization:
                     mode: Webhook
-        set_fact:
-            cntr_k8_000380_updated_kubelet_cfg: "{{ cntr_k8_000380_original_kubelet_cfg | combine(cntr_k8_000380_new_kubelet_cfg) }}"
         when: cntr_k8_000380_original_kubelet_cfg.authorization.mode is not defined
 
       - name: "HIGH | CNTR-K8-000380 | AUDIT | The Kubernetes kubelet must enable explicit authorization. | Update existing value"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_000380_updated_kubelet_cfg: "{{ cntr_k8_000380_original_kubelet_cfg | combine(cntr_k8_000380_updated_kubelet_cfg, recursive=True) }}"
         vars:
             cntr_k8_000380_updated_kubelet_cfg:
@@ -189,7 +189,7 @@
         when: cntr_k8_000380_original_kubelet_cfg.authorization.mode is defined and cntr_k8_000380_original_kubelet_cfg.authorization.mode != "Webhook"
 
       - name: "HIGH | CNTR-K8-000380 | PATCH | The Kubernetes kubelet must enable explicit authorization. | Ensure that the --authorization-mode argument is not set to AlwaysAllow"
-        copy:
+        ansible.builtin.copy:
             content: '{{ cntr_k8_000380_updated_kubelet_cfg | to_nice_yaml }}'
             dest: "{{ kubelet_config_file }}"
             backup: true
@@ -207,7 +207,7 @@
       - kubelet
 
 - name: "HIGH | CNTR-K8-000440 | PATCH | The Kubernetes kubelet static PodPath must not enable static pods."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ kubelet_config_file }}"
       regexp: '^staticPodPath: '
       state: absent
@@ -226,13 +226,13 @@
 - name: "HIGH | CNTR-K8-001160 | AUDIT | Secrets in Kubernetes must not be stored as environment variables."
   block:
       - name: "HIGH | CNTR-K8-001160 | AUDIT | Secrets in Kubernetes must not be stored as environment variables. | Find any Secrets"
-        shell: kubectl get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind} {.metadata.name} {"\n"}{end}' -A
+        ansible.builtin.shell: kubectl get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind} {.metadata.name} {"\n"}{end}' -A
         changed_when: false
         failed_when: false
         register: cntr_k8_001160_secret_env_vars
 
       - name: "HIGH | CNTR-K8-001160 | AUDIT | Secrets in Kubernetes must not be stored as environment variables. | Warn on env var secrets"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! You have secrets that are stored as environment variables"
                 - "Please migrate these to secret files to conform to STIG standards"
@@ -257,24 +257,24 @@
 - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection."
   block:
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Slurp file {{ kubelet_config_file }}"
-        slurp:
+        ansible.builtin.slurp:
             src: "{{ kubelet_config_file }}"
         register: cntr_k8_01620_slurped
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Convert to dictionary"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_0162_original_kublet_cfg: "{{ cntr_k8_01620_slurped.content|b64decode|from_yaml }}"
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Add new value"
+        ansible.builtin.set_fact:
+            cntr_k8_01620_updated_kubelet_cfg: "{{ cntr_k8_0162_original_kublet_cfg | combine(cntr_k8_01620_new_kublet_cfg) }}"
         vars:
             cntr_k8_01620_new_kublet_cfg:
                 protectKernelDefaults: true
-        set_fact:
-            cntr_k8_01620_updated_kubelet_cfg: "{{ cntr_k8_0162_original_kublet_cfg | combine(cntr_k8_01620_new_kublet_cfg) }}"
         when: cntr_k8_0162_original_kublet_cfg.protectKernelDefaults is not defined
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Update existing value"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_01620_updated_kubelet_cfg: "{{ cntr_k8_0162_original_kublet_cfg | combine(cntr_k8_01620_updated_kubelet_cfg, recursive=True) }}"
         vars:
             cntr_k8_01620_updated_kubelet_cfg:
@@ -284,7 +284,7 @@
             - cntr_k8_0162_original_kublet_cfg.protectKernelDefaults
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Ensure that the --protect-kernel-defaults argument is set to true"
-        copy:
+        ansible.builtin.set_fact:
             content: '{{ cntr_k8_01620_updated_kubelet_cfg | to_nice_yaml }}'
             dest: "{{ kubelet_config_file }}"
         notify: kubelet restart
@@ -303,7 +303,7 @@
       - kernel
 
 - name: "HIGH | CNTR-K8-001990 | PATCH | Kubernetes must prevent non-privileged users from executing privileged functions to include disabling, circumventing, or altering implemented security safeguards/countermeasures or the installation of patches and updates."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --authorization-mode=.*)$'
       line: "    - --authorization-mode={{ cntrk8stig_kubeapi_auth_mode }}"
@@ -323,7 +323,7 @@
       - api_server
 
 - name: "HIGH | CNTR-K8-002000 | PATCH | The Kubernetes API server must have the ValidatingAdmissionWebhook enabled."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --enable-admission-plugins=.*)$'
       line: "    - --enable-admission-plugins={{ cntrk8stig_kubeapi_enable_admission_plugins }}"
@@ -343,12 +343,12 @@
 - name: "HIGH | CNTR-K8-002010 | PATCH | Kubernetes must have a pod security policy set."
   block:
       - name: "HIGH | CNTR-K8-002010 | PATCH | Kubernetes must have a pod security policy set. | Put the restricted.yaml where it needs to go"
-        template:
+        ansible.builtin.template:
             src: restricted.yml.j2
             dest: /etc/kubernetes/restricted.yaml
 
       - name: "HIGH | CNTR-K8-002010 | PATCH | Kubernetes must have a pod security policy set. | Set security policy"
-        shell: kubectl create -f /etc/kubernetes/restricted.yaml
+        ansible.builtin.shell: kubectl create -f /etc/kubernetes/restricted.yaml
         changed_when: true
         failed_when: false
   when:
@@ -365,7 +365,7 @@
       - security_policy
 
 - name: "HIGH | CNTR-K8-002620 | PATCH | Kubernetes API Server must disable basic authentication to protect information in transit."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --basic-auth-file.*)$'
       state: absent

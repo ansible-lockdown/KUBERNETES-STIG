@@ -1,7 +1,7 @@
 ---
 
-- name: "MEDIIUM | CNTR-K8-000150 | PATCH | The Kubernetes Controller Manager must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
-  lineinfile:
+- name: "MEDIUM | CNTR-K8-000150 | PATCH | The Kubernetes Controller Manager must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+  ansible.builtin.lineinfile:
       path: "{{ controller_manager_pod_specification_file }}"
       regexp: '^(\s+- --tls-min-version.*)$'
       line: "    - --tls-min-version={{ cntrk8stig_kube_controller_manager_tls }}"
@@ -20,7 +20,7 @@
       - kube_control_manager
 
 - name: "MEDIUM | CNTR-K8-000160 | PATCH | The Kubernetes Scheduler must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ scheduler_pod_specification_file }}"
       regexp: '^(\s+- --tls-min-version.*)$'
       line: "    - --tls-min-version={{ cntrk8stig_kube_scheduler_manager_tls }}"
@@ -40,7 +40,7 @@
 - name: |
     "MEDIUM | CNTR-K8-000170 | PATCH | The Kubernetes API Server must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
     "MEDIUM | CNTR-K8-003350 | PATCH | The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --tls-min-version.*)$'
       line: "    - --tls-min-version={{ cntrk8stig_kube_api_server_tls }}"
@@ -62,7 +62,7 @@
       - kube_api_server
 
 - name: "MEDIUM | CNTR-K8-000180 | PATCH | The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ etcd_pod_specification_file }}"
       regexp: '^(\s+- --auto-tls=.*)$'
       line: "    - --auto-tls=false"
@@ -80,7 +80,7 @@
       - kube_etcd
 
 - name: "MEDIUM | CNTR-K8-000190 | PATCH | The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ etcd_pod_specification_file }}"
       regexp: '^(\s+- --peer-auto-tls=.*)$'
       line: "    - --peer-auto-tls=false"
@@ -98,7 +98,7 @@
       - kube_etcd
 
 - name: "MEDIUM | CNTR-K8-000270 | PATCH | The Kubernetes API Server must enable Node,RBAC as the authorization mode."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --authorization-mode.*)$'
       line: "    - --authorization-mode=Node,RBAC"
@@ -116,7 +116,7 @@
       - kube_api_server
 
 - name: "MEDIUM | CNTR-K8-000300 | PATCH | The Kubernetes Scheduler must have secure binding."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ scheduler_pod_specification_file }}"
       regexp: '^(\s+- --bind-address.*)$'
       line: "    - --bind-address=127.0.0.1"
@@ -134,7 +134,7 @@
       - kube_scheduler
 
 - name: "MEDIUM | CNTR-K8-000310 | PATCH | The Kubernetes Controller Manager must have secure binding."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ controller_manager_pod_specification_file }}"
       regexp: '^(\s+- --bind-address.*)$'
       line: "    - --bind-addressn=127.0.0.1"
@@ -152,7 +152,7 @@
       - kube_control_manager
 
 - name: "MEDIUM | CNTR-K8-000350 | PATCH | The Kubernetes API server must have the secure port set."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --secure-port.*)$'
       line: "    - --secure-port={{ cntrk8stig_kube_api_server_secure_port }}"
@@ -172,7 +172,7 @@
 - name: |
       "MEDIUM | CNTR-K8-000400 | PATCH | Kubernetes Worker Nodes must not have sshd service running."
       "MEDIUM | CNTR-K8-000410 | PATCH | Kubernetes Worker Nodes must not have the sshd service enabled."
-  systemd:
+  ansible.builtin.systemd:
       name: sshd
       state: stopped
       enabled: false
@@ -197,13 +197,13 @@
 - name: "MEDIUM | CNTR-K8-000420 | PATCH | Kubernetes dashboard must not be enabled."
   block:
       - name: "MEDIUM | CNTR-K8-000420 | PATCH | Kubernetes dashboard must not be enabled. | Get if dashboard available"
-        shell: kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard
+        ansible.builtin.shell: kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard
         changed_when: false
         failed_when: false
         register: cntr_k8_000420_kube_dash_status
 
       - name: "MEDIUM | CNTR-K8-000420 | PATCH | Kubernetes dashboard must not be enabled. | Remove dashboard if exists"
-        shell: kubectl delete deployment kubernetes-dashboard --namespace=kube-system
+        ansible.builtin.shell: kubectl delete deployment kubernetes-dashboard --namespace=kube-system
         changed_when: true
         when: cntr_k8_000420_kube_dash_status.stdout | length >=1
   when:
@@ -219,23 +219,17 @@
 
 - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results."
   block:
-      - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Get Client version"
-        shell: kubectl version --short | grep "Client Version" | cut -d"v" -f2
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000430_kubectl_client_version
-
       - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Message out version"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Your version needs to be 1.12.9 or newer"
-        when: cntr_k8_000430_kubectl_client_version.stdout is version('1.12.0', '<=')
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.12.0', '<=')
 
       - name: "MEDIUM | CNTR-K8-000430 | PATCH | Kubernetes Kubectl cp command must give expected access and results. | Warning count"
         ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'CNTR-K8-000430'
-        when: cntr_k8_000430_kubectl_client_version.stdout is version('1.12.0', '<=')
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.12.0', '<=')
   when:
       - cntr_k8_000430
   tags:
@@ -250,13 +244,13 @@
 - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
   block:
       - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates files"
-        shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet | cut -d":" -f1
+        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet | cut -d":" -f1
         changed_when: false
         failed_when: false
         register: cntr_k8_000450_feature_gates_files
 
       - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Update DynamicAuditing"
-        replace:
+        ansible.builtin.replace:
             path: "{{ item }}"
             regexp: 'DynamicAuditing=true'
             replace: "DynamicAuditing=false"
@@ -278,13 +272,13 @@
 - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
   block:
       - name: "MEDIUM | CNTR-K8-000450 | AUDIT | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates"
-        shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet
+        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet
         changed_when: false
         failed_when: false
         register: cntr_k8_000450_feature_gates
 
       - name: "MEDIUM | CNTR-K8-000450 | AUDIT | Kubernetes DynamicAuditing must not be enabled | Split Get feature-gates values"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_000450_split_fg: "{{ cntr_k8_000450_feature_gates.stdout_lines | map('regex_replace', ld_passwd_regex, ld_passwd_yaml) | map('from_yaml') | list }}"
         vars:
             ld_passwd_regex: >-
@@ -297,7 +291,7 @@
         when: cntr_k8_000450_feature_gates.stdout | length >= 1
 
       - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Update DynamicKubeletConfig"
-        replace:
+        ansible.builtin.replace:
             path: "{{ item.path }}"
             regexp: 'DynamicKubeletConfig=true'
             replace: "DynamicKubeletConfig=false"
@@ -309,7 +303,7 @@
             - "'DynamicKubeletConfig=true' in item.entry"
 
       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Add DynamicKubeletConfig"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: "{{ item.path }}"
             regexp: '^(\s+- --feature-gates=.*)$'
             line: "{{ item.entry }},DynamicKubeletConfig=false"
@@ -337,13 +331,13 @@
 - name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled."
   block:
       - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Get feature-gate paths and entries"
-        shell: grep -is feature-gates /etc/kubernetes/manifests/*
+        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/*
         changed_when: false
         failed_when: false
         register: cntr_k8_000470_feature_gates
 
       - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Split Get feature-gates values"
-        set_fact:
+        ansible.builtin.set_fact:
             cntr_k8_000470_split_fg: "{{ cntr_k8_000470_feature_gates.stdout_lines | map('regex_replace', split_000470_regex, split_000470_yaml) | map('from_yaml') | list }}"
         vars:
             split_000470_regex: >-
@@ -356,7 +350,7 @@
         when: cntr_k8_000470_feature_gates.stdout | length >= 1
 
       - name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled. | Update AllAlpha"
-        replace:
+        ansible.builtin.replace:
             path: "{{ item.path }}"
             regexp: 'AllAlpha=true'
             replace: 'AllAlpha=false'
@@ -381,7 +375,7 @@
       - feature_gates
 
 - name: "MEDIUM | CNTR-K8-000600 | PATCH | The Kubernetes API Server must have an audit policy set."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --audit-policy-file.*)$'
       line: "    - --audit-policy-file={{ cntrk8stig_api_server_audit_policy_file }}"
@@ -398,8 +392,8 @@
       - V-242401
       - kube_api_server
 
-- name: "MEDIIUM | CNTR-K8-000610 | PATCH | The Kubernetes API Server must have an audit log path set."
-  lineinfile:
+- name: "MEDIUM | CNTR-K8-000610 | PATCH | The Kubernetes API Server must have an audit log path set."
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --audit-log-path.*)$'
       line: "    - --audit-log-path={{ cntrk8stig_api_server_audit_log_path }}"
@@ -417,7 +411,7 @@
       - kube_api_server
 
 - name: "MEDIUM | CNTR-K8-000700 | PATCH | Kubernetes API Server must generate audit records that identify what type of event has occurred, identify the source of the event, contain the event results, identify any users, and identify any containers associated with the event."
-  template:
+  ansible.builtin.template:
       src: audit-policy.yaml.j2
       dest: "{{ cntrk8stig_api_server_audit_policy_file }}"
   when:
@@ -446,21 +440,14 @@
       - kube_api_server
 
 - name: "MEDIUM | CNTR-K8-000850 | PATCH | Kubernetes Kubelet must deny hostname override."
-  block:
-      - name: "MEDIUM | CNTR-K8-000850 | AUDIT | Kubernetes Kubelet must deny hostname override. | Chekc for /etc/sysconfig/kublet file"
-        stat:
-            path: /etc/sysconfig/kubelet
-        register: cntr_k8_000850_kublet_status
-
-      - name: "MEDIUM | CNTR-K8-000850 | PATCH | Kubernetes Kubelet must deny hostname override. | Remove if file exists"
-        lineinfile:
-            path: /etc/sysconfig/kubelet
-            regexp: '--hostname-override'
-            state: absent
-        notify: kubelet restart
-        when: cntr_k8_000850_kublet_status.stat.exists
+  ansible.builtin.lineinfile:
+      path: /etc/sysconfig/kubelet
+      regexp: '--hostname-override'
+      state: absent
+  notify: kubelet restart
   when:
       - cntr_k8_000850
+      - "'/etc/sysconfig/kubelet' in kubelet_file"
   tags:
       - CNTR-K8-000850
       - CAT2
@@ -477,7 +464,7 @@
       - name: |
           "MEDIUM | CNTR-K8-000860 | AUDIT | The Kubernetes manifests must be owned by root. | Get files"
           "MEDIUM | CNTR-K8-000900 | AUDIT | The Kubernetes manifests must have least privileges. | Get files"
-        find:
+        ansible.builtin.find:
             path: /etc/kubernetes/manifests/
             patterns: '*.yaml'
         register: cntr_k8_000860_files
@@ -485,7 +472,7 @@
       - name: |
           "MEDIUM | CNTR-K8-000860 | PATCH | The Kubernetes manifests must be owned by root. | Change permissions on files"
           "MEDIUM | CNTR-K8-000900 | PATCH | The Kubernetes manifests must have least privileges. | Change permissions on files"
-        file:
+        ansible.builtin.file:
             path: "{{ item.path }}"
             mode: "{{ cntr_k8_000900 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_000860 | ternary('root',omit) }}"
@@ -519,20 +506,19 @@
       - name: |
           "MEDIUM | CNTR-K8-000880 | AUDIT | The Kubernetes kubelet configuration file must be owned by root. | Get file status"
           "MEDIUM | CNTR-K8-000890 | AUDIT | The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive. | Get file status"
-        find:
-            path: /etc/sysconfig
-            patterns: kubelet
+        ansible.builtin.stat:
+            path: /etc/sysconfig/kubelet
         register: cntr_k8_000880_kubelet_file_status
 
       - name: |
           "MEDIUM | CNTR-K8-000880 | PATCH | The Kubernetes kubelet configuration file must be owned by root. | Set group and owner"
           "MEDIUM | CNTR-K8-000890 | PATCH | The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive. | Set permissions"
-        file:
+        ansible.builtin.file:
             path: /etc/sysconfig/kubelet
             mode: "{{ cntr_k8_000890 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_000880 | ternary('root',omit) }}"
             group: "{{ cntr_k8_000880 | ternary('root',omit) }}"
-        when: cntr_k8_000880_kubelet_file_status.matched >= 1
+        when: cntr_k8_000880_kubelet_file_status.stat.exists
   when:
       - cntr_k8_000880 or
         cntr_k8_000890
@@ -551,7 +537,7 @@
       - permissions
 
 - name: "MEDIUM | CNTR-K8-000910 | PATCH | Kubernetes Controller Manager must disable profiling."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ controller_manager_pod_specification_file }}"
       regexp: '^(\s+- --profiling.*)$'
       line: "    - --profiling=false"
@@ -571,25 +557,25 @@
 - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)"
   block:
       - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Get secure port"
-        shell: grep -I -secure-port {{ scheduler_pod_specification_file }}
+        ansible.builtin.shell: grep -I -secure-port {{ scheduler_pod_specification_file }}
         changed_when: false
         failed_when: false
         register: cntr_k8_000920_secure_port
 
       - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Get etcd servers"
-        shell: grep -I -etcd-servers {{ scheduler_pod_specification_file }}
+        ansible.builtin.shell: grep -I -etcd-servers {{ scheduler_pod_specification_file }}
         changed_when: false
         failed_when: false
         register: cntr_k8_000920_etcd_servers
 
       - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Get namespace"
-        shell: kubectl describe services –all-namespace
+        ansible.builtin.shell: kubectl describe services –all-namespace
         changed_when: false
         failed_when: false
         register: cntr_k8_000920_name_space
 
       - name: "MEDIUM | CNTR-K8-000920 | AUDIT | The Kubernetes API Server must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL) | Display ports, etcd servers, and name space"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Below are the secure port, etcd servers, and name spaces of the kube-api-server configuration"
                 - To conform to STIG standards these need to conform to PPSM CAL standards"
@@ -619,25 +605,25 @@
 - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)."
   block:
       - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get insecure ports"
-        shell: grep -I -insecure-port {{ scheduler_pod_specification_file }}
+        ansible.builtin.shell: grep -I -insecure-port {{ scheduler_pod_specification_file }}
         changed_when: false
         failed_when: false
         register: cntr_k8_000930_insecure_port
 
       - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get secure ports"
-        shell: grep -I -secure-port {{ scheduler_pod_specification_file }}
+        ansible.builtin.shell: grep -I -secure-port {{ scheduler_pod_specification_file }}
         changed_when: false
         failed_when: false
         register: cntr_k8_000930_secure_port
 
       - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get namespaces"
-        shell: kubectl describe services –all-namespace
+        ansible.builtin.shell: kubectl describe services –all-namespace
         changed_when: false
         failed_when: false
         register: cntr_k8_000930_name_space
 
       - name: "MEDIUM | CNTR-K8-000930 | AUDIT | The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Display ports and namespace"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Below are the ports and namespaces in the kube-schedule.yaml configuration"
                 - "To conform to STIG standards these need to conform to PPSM CAL standards"
@@ -667,19 +653,19 @@
 - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)."
   block:
       - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get secure ports"
-        shell: grep -I -secure-port {{ controller_manager_pod_specification_file }}
+        ansible.builtin.shell: grep -I -secure-port {{ controller_manager_pod_specification_file }}
         changed_when: false
         failed_when: false
         register: cntr_k8_000940_secure_port
 
       - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get namespaces"
-        shell: kubectl describe services –all-namespace
+        ansible.builtin.shell: kubectl describe services –all-namespace
         changed_when: false
         failed_when: false
         register: cntr_k8_000940_name_space
 
       - name: "MEDIUM | CNTR-K8-000940 | AUDIT | The Kubernetes Controllers must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Display ports nad namespace"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Below are the ports and namespaces in the kube-controller-manager.yaml configuration"
                 - "To conform to STIG standards these need to conform to PPSM CAL standards"
@@ -706,13 +692,13 @@
 - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL)."
   block:
       - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Get etcd servers"
-        shell: grep -I -etcd-servers {{ api_server_pod_specification_file }}
+        ansible.builtin.shell: grep -I -etcd-servers {{ api_server_pod_specification_file }}
         changed_when: false
         failed_when: false
         register: cntr_k8_000950_etcd_servers
 
       - name: "MEDIUM | CNTR-K8-000950 | AUDIT | The Kubernetes etcd must enforce ports, protocols, and services (PPS) that adhere to the Ports, Protocols, and Services Management Category Assurance List (PPSM CAL). | Display etcd servers"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Below are the etcd servers in the kupe-apiserver.yaml configuration"
                 - To conform to STIG standards these need to conform to PPSM CAL standards"
@@ -736,7 +722,7 @@
       - ppsm_cal
 
 - name: "MEDIUM | CNTR-K8-000960 | AUDIT | The Kubernetes cluster must use non-privileged host ports for user pods."
-  shell: /bin/true
+  ansible.builtin.shell: /bin/true
   changed_when: false
   failed_when: false
   when:
@@ -753,7 +739,7 @@
       - not_implemented
 
 - name: "MEDIUM | CNTR-K8-001360 | AUDIT | Kubernetes must separate user functionality."
-  shell: /bin/true
+  ansible.builtin.shell: /bin/true
   changed_when: false
   failed_when: false
   when:
@@ -770,7 +756,7 @@
       - not_implemented
 
 - name: "MEDIUM | CNTR-K8-001400 | PATCH | The Kubernetes API server must use approved cipher suites."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --tls-cipher-suites=.*)$'
       line: "    - --tls-cipher-suites={{ cntrk8stig_kubeapi_tls_cipher_suites }}"
@@ -789,11 +775,12 @@
       - cyphers
 
 - name: "MEDIUM | CNTR-K8-001410 | PATCH | Kubernetes API Server must have the SSL Certificate Authority set."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --client-ca-file=.*)$'
       line: "    - --client-ca-file={{ cntrk8stig_kubeapi_client_ca_file }}"
       insertafter: '^\s+- kube-apiserver$'
+  notify: kubelet restart
   when:
       - cntr_k8_001410
       - kubernetes_master
@@ -808,7 +795,7 @@
       - certificates
 
 - name: "MEDIUM | CNTR-K8-001420 | PATCH | Kubernetes Kubelet must have the SSL Certificate Authority set."
-  shell: /bin/true
+  ansible.builtin.shell: /bin/true
   changed_when: false
   failed_when: false
   when:
@@ -822,12 +809,15 @@
       - SV-242420r799987_rule
       - V-242420
       - kubelet
-      - not_implemented_yet
+      - not_implemented
 
 - name: "MEDIUM | CNTR-K8-001430 | PATCH | Kubernetes Controller Manager must have the SSL Certificate Authority set."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --root-ca-file=.*)$'
+      line: "    - --root-ca-file={{ cntrk8stig_kubeapi_root_ca_file }}"
+      insertafter: '^\s+- kube-apiserver'
+  notify: kubelet restart
   when:
       - cntr_k8_001430
       - kubernetes_master
@@ -839,12 +829,18 @@
       - SV-242421r717033_rule
       - V-242421
       - kube_control_manager
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001440 | PATCH |  Kubernetes API Server must have a certificate for communication."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      insertafter: '^\s+- kube-apiserver'
+  with_items:
+      - { regexp: '^(\s+- --tls-cert-file=.*)$', line: "    - --tls-cert-file={{ cntrk8stig_tls_cert_file }}" }
+      - { regexp: '^(\s+- --tls-private-key-file=.*)$', line: "    - --tls-private-key-file={{ cntrk8stig_tls_privkey_file }}" }
+  loop_control:
+      label: "{{ item.line }}"
   when:
       - cntr_k8_001440
       - kubernetes_master
@@ -856,12 +852,13 @@
       - SV-242422r712622_rule
       - V-242422
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001450 | PATCH | Kubernetes etcd must enable client authentication to secure service."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --client-cert-auth=.*)$'
+      line: "    - --client-cert-auth=true"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001450
       - kubernetes_master
@@ -873,12 +870,47 @@
       - SV-242423r808580_rule
       - V-242423
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  block:
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if both EXRA_ARGS and streaming connection exist"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'tls-private-key-file=([\S])([^"])'
+            replace: tls-private-key-file={{ cntrk8stig_tls_privkey_file }}
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-private-key-file' in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if EXRA_ARGS exist and not streaming connection"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'KUBELET_EXTRA_ARGS='
+            replace: 'KUBELET_EXTRA_ARGS=--tls-private-key-file={{ cntrk8stig_tls_privkey_file }} '
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-private-key-file' not in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for non-systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'KUBELET_EXTRA_ARGS=--tls-private-key-file={{ cntrk8stig_tls_privkey_file }}'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
+
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'Environment="KUBELET_EXTRA_ARGS=--tls-private-key-file={{ cntrk8stig_tls_privkey_file }}"'
+            insertafter: '\[Service\]'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001460
       - kubernetes_master
@@ -890,12 +922,47 @@
       - SV-242424r825890_rule
       - V-242424
       - kubelet
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  block:
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if both EXRA_ARGS and streaming connection exist"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'tls-cert-file=([\S])([^"])'
+            replace: tls-cert-file={{ cntrk8stig_tls_cert_file }}
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-cert-file' in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if EXRA_ARGS exist and not streaming connection"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'KUBELET_EXTRA_ARGS='
+            replace: 'KUBELET_EXTRA_ARGS=--tls-cert-file={{ cntrk8stig_tls_cert_file }} '
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-cert-file' not in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for non-systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'KUBELET_EXTRA_ARGS=--tls-cert-file={{ cntrk8stig_tls_cert_file }}'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
+
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'Environment="KUBELET_EXTRA_ARGS=--tls-cert-file={{ cntrk8stig_tls_cert_file }}"'
+            insertafter: '\[Service\]'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001470
       - kubernetes_master
@@ -907,12 +974,13 @@
       - SV-242425r825892_rule
       - V-242425
       - kubelet
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001480 | PATCH | Kubernetes etcd must enable client authentication to secure service."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --peer-client-cert-auth=.*)$'
+      line: "    - --peer-client-cert-auth=true"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001480
       - kubernetes_master
@@ -924,12 +992,13 @@
       - SV-242426r821607_rule
       - V-242426
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001490 | PATCH | Kubernetes etcd must have a key file for secure communication."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --key-file=.*)$'
+      line: "    - --key-file={{ cntrk8stig_tls_privkey_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001490
       - kubernetes_master
@@ -941,12 +1010,13 @@
       - SV-242427r808583_rule
       - V-242427
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001500 | PATCH | Kubernetes etcd must have a certificate for communication."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --cert-file=.*)$'
+      line: "    - --cert-file={{ cntrk8stig_tls_cert_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001500
       - kubernetes_master
@@ -961,9 +1031,11 @@
       - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001510 | PATCH | Kubernetes etcd must have the SSL Certificate Authority set."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --etcd-cafile=.*)$'
+      line: "    - --etcd-cafile={{ cntrk8stig_etcd_catfile }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001510
       - kubernetes_master
@@ -975,12 +1047,13 @@
       - SV-242429r808589_rule
       - V-242429
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001520 | PATCH | Kubernetes etcd must have a certificate for communication."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --etcd-certfile=.*)$'
+      line: "    - --etcd-certfile={{ cntrk8stig_etcd_certfile }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001520
       - kubernetes_master
@@ -992,12 +1065,13 @@
       - SV-242430r808592_rule
       - V-242430
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001530 | PATCH | Kubernetes etcd must have a key file for secure communication."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --etcd-keyfile=.*)$'
+      line: "    - --etcd-keyfile={{ cntrk8stig_etcd_keyfile }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001530
       - kubernetes_master
@@ -1009,12 +1083,13 @@
       - SV-242431r808595_rule
       - V-242431
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001540 | PATCH | Kubernetes etcd must have peer-cert-file set for secure communication."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --peer-cert-file=.*)$'
+      line: "    - --peer-cert-file={{ cntrk8stig_etcd_peercert_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001540
       - kubernetes_master
@@ -1026,12 +1101,13 @@
       - SV-242432r808597_rule
       - V-242432
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001550 | PATCH | Kubernetes etcd must have a peer-key-file set for secure communication."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --peer-key-file=.*)$'
+      line: "    - --peer-key-file={{ cntrk8stig_etcd_peerkey_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001550
       - kubernetes_master
@@ -1043,12 +1119,13 @@
       - SV-242433r808599_rule
       - V-242433
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-002600 | PATCH | Kubernetes API Server must configure timeouts to limit attack surface."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --request-timeout=.*)$'
+      line: "    - --request-timeoute={{ cntrk8stig_api_request_timeout }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_002600
       - kubernetes_master
@@ -1060,10 +1137,10 @@
       - SV-242438r754802_rule
       - V-242438
       - kube_api_server
-      - not_implemented_yet
+
 
 - name: "MEDIUM | CNTR-K8-002700 | PATCH | Kubernetes must remove old components after updated versions have been installed."
-  shell: /bin/true
+  ansible.builtin.shell: /bin/true
   changed_when: false
   failed_when: false
   when:
@@ -1082,14 +1159,16 @@
 - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs."
   block:
       - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. | Warn on bad version"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Please make sure you are on version 1.16.7 or newer"
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.16.7', '<=')
 
       - name: "MEDIUM | CNTR-K8-002720 | AUDIT | Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. | Warn count"
         ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'CNTR-K8-002720'
+        when: cntrk8stig_kubectl_client_version.stdout is version('1.16.7', '<=')
   when:
       - cntr_k8_002720
   tags:
@@ -1103,13 +1182,13 @@
 - name: "MEDIUM | CNTR-K8-003110 | PATCH | The Kubernetes component manifests must be owned by root."
   block:
       - name: "MEDIUM | CNTR-K8-003110 | AUDIT | The Kubernetes component manifests must be owned by root. | Find manifest files"
-        find:
+        ansible.builtin.find:
             path: "/etc/kubernetes/manifests"
             patterns: "*.yaml"
         register: cntr_k8_003110_manifest_files
 
       - name: "MEDIUM | CNTR-K8-003110 | PATCH | The Kubernetes component manifests must be owned by root. | Apply root owner"
-        file:
+        ansible.builtin.file:
             path: "{{ item.path }}"
             owner: root
         with_items:
@@ -1134,7 +1213,7 @@
       - name: |
           "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd."
           "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive."
-        shell: find /var/lib/etcd/ \( ! -group etcd -o ! -user etcd -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
+        ansible.builtin.shell: find /var/lib/etcd/ \( ! -group etcd -o ! -user etcd -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
         changed_when: false
         failed_when: false
         register: cntr_k8_003120_etc_files
@@ -1142,7 +1221,7 @@
       - name: |
           "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd."
           "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive."
-        shell: find /var/lib/etcd/ \( ! -group etcd -o ! -user etcd -o -perm /022 \) -type d -exec stat -c "%n" '{}' \;
+        ansible.builtin.shell: find /var/lib/etcd/ \( ! -group etcd -o ! -user etcd -o -perm /022 \) -type d -exec stat -c "%n" '{}' \;
         changed_when: false
         failed_when: false
         register: cntr_k8_003120_etc_directories
@@ -1150,7 +1229,7 @@
       - name: |
           "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd. | Set file permissions"
           "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive. | File file permissions"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ cntr_k8_003260 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_003120 | ternary('etcd',omit) }}"
@@ -1162,7 +1241,7 @@
       - name: |
           "MEDIUM | CNTR-K8-003120 | PATCH | The Kubernetes component etcd must be owned by etcd. | Set dir permissions"
           "MEDIUM | CNTR-K8-003260 | PATCH | The Kubernetes etcd must have file permissions set to 644 or more restrictive. | Set dir permissions"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ cntr_k8_003260 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_003120 | ternary('etcd',omit) }}"
@@ -1190,7 +1269,7 @@
 - name: |
     "MEDIUM | CNTR-K8-003130 | PATCH | The Kubernetes conf files must be owned by root."
     "MEDIUM | CNTR-K8-003270 | PATCH | The Kubernetes admin.conf must have file permissions set to 644 or more restrictive."
-  file:
+  ansible.builtin.file:
       path: "{{ item }}"
       mode: "{{ cntr_k8_003270 | ternary('644',omit) }}"
       owner: "{{ cntr_k8_003130 | ternary('root',omit) }}"
@@ -1222,14 +1301,14 @@
       - name: |
           "MEDIUM | CNTR-K8-003140 | AUDIT | The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive. | Check config file status"
           "MEDIUM | CNTR-K8-003150 | AUDIT | The Kubernetes Kube Proxy must be owned by root.| Check config file status"
-        stat:
+        ansible.builtin.stat:
             path: "{{ proxy_kubeconfig_file }}"
         register: cntr_k8_003140_proxy_config_file_status
 
       - name: |
           "MEDIUM | CNTR-K8-003140 | PATCH | The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive. | Set permissions"
           "MEDIUM | CNTR-K8-003150 | PATCH | The Kubernetes Kube Proxy must be owned by root. | Set permissions"
-        file:
+        ansible.builtin.file:
             path: "{{ proxy_kubeconfig_file }}"
             mode: "{{ cntr_k8_003140 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_003150 | ternary('root',omit) }}"
@@ -1250,40 +1329,29 @@
       - V-242448
       - permissions
 
-- name: "MEDIUM | CNTR-K8-003160 | PATCH | The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
+- name: |
+    "MEDIUM | CNTR-K8-003160 | PATCH | The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive."
+    "MEDIUM | CNTR-K8-003170 | PATCH | The Kubernetes Kubelet certificate authority must be owned by root."
+  ansible.builtin.file:
+      path: "{{ cntrk8stig_kubeapi_client_ca_file }}"
+      mode: "{{ cntr_k8_003160 | ternary('0644',omit) }}"
+      owner: "{{ cntr_k8_003170 | ternary('root',omit) }}"
+      group: "{{ cntr_k8_003170 | ternary('root',omit) }}"
   when:
-      - cntr_k8_003160
+      - cntr_k8_003160 or
+        cntr_k8_003170
       - kubernetes_master
   tags:
       - CNTR-K8-003160
-      - CAT2
-      - CCI-000366
-      - SRG-APP-000516-CTR-001325
-      - SV-242449r821614_rule
-      - V-242449
-      - permissions
-      - not_implemented_yet
-
-
-- name: "MEDIUM | CNTR-K8-003170 | PATCH | The Kubernetes Kubelet certificate authority must be owned by root."
-  shell: /bin/true
-  changed_when: false
-  failed_when: false
-  when:
-      - cntr_k8_003170
-      - kubernetes_master
-  tags:
       - CNTR-K8-003170
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001325
+      - SV-242449r821614_rule
       - SV-242450r754804_rule
+      - V-242449
       - V-242450
       - permissions
-      - not_implemented_yet
 
 - name: |
     "MEDIUM | CNTR-K8-003180 | PATCH | The Kubernetes component PKI must be owned by root."
@@ -1292,7 +1360,7 @@
       - name: |
           "MEDIUM | CNTR-K8-003180 | AUDIT | The Kubernetes component PKI must be owned by root. | Get files"
           "MEDIUM | CNTR-K8-003330 | AUDIT | The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive. | Get files"
-        shell: find /etc/kubernetes/pki/ \( ! -group root -o ! -user root -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
+        ansible.builtin.shell: find /etc/kubernetes/pki/ \( ! -group root -o ! -user root -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
         changed_when: false
         failed_when: false
         register: cntr_k8_003180_pki_files
@@ -1300,7 +1368,7 @@
       - name: |
           "MEDIUM | CNTR-K8-003180 | PATCH | The Kubernetes component PKI must be owned by root. | Set permissions"
           "MEDIUM | CNTR-K8-003330 | PATCH | The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive. | Set permissions"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ cntr_k8_003330 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_003180 | ternary('root',omit) }}"
@@ -1327,7 +1395,7 @@
 - name: |
     "MEDIUM | CNTR-K8-003190 | PATCH | The Kubernetes kubelet config must have file permissions set to 644 or more restrictive."
     "MEDIUM | CNTR-K8-003200 | PATCH | The Kubernetes kubelet config must be owned by root."
-  file:
+  ansible.builtin.file:
       path: /etc/kubernetes/kubelet.conf
       mode: "{{ cntr_k8_003190 | ternary('644',omit) }}"
       owner: "{{ cntr_k8_003200 | ternary('root',omit) }}"
@@ -1350,7 +1418,7 @@
 - name: |
     "MEDIUM | CNTR-K8-003210 | PATCH | The Kubernetes kubeadm.conf must be owned by root."
     "MEDIUM | CNTR-K8-003220 | PATCH | The Kubernetes kubeadm.conf must have file permissions set to 644 or more restrictive."
-  file:
+  ansible.builtin.file:
       path: "{{ cntrk8stig_kubelet_service_file }}"
       mode: "{{ cntr_k8_003220 | ternary('644',omit) }}"
       owner: "{{ cntr_k8_003210 | ternary('root',omit) }}"
@@ -1373,7 +1441,7 @@
 - name: |
     "MEDIUM | CNTR-K8-003230 | PATCH | The Kubernetes kubelet config must have file permissions set to 644 or more restrictive."
     "MEDIUM | CNTR-K8-003240 | PATCH | The Kubernetes kubelet config must be owned by root."
-  file:
+  ansible.builtin.file:
       path: /var/lib/kubelet/config.yaml
       mode: "{{ cntr_k8_003230 | ternary('644',omit) }}"
       owner: "{{ cntr_k8_003240 | ternary('root',omit) }}"
@@ -1396,13 +1464,13 @@
 - name: "MEDIUM | CNTR-K8-003250 | PATCH | The Kubernetes API Server must have file permissions set to 644 or more restrictive."
   block:
       - name: "MEDIUM | CNTR-K8-003250 | AUDIT | The Kubernetes API Server must have file permissions set to 644 or more restrictive. | Get files"
-        shell: find /etc/kubernetes/manifests/ -perm /022 -type f -exec stat -c "%n" '{}' \;
+        ansible.builtin.shell: find /etc/kubernetes/manifests/ -perm /022 -type f -exec stat -c "%n" '{}' \;
         changed_when: false
         failed_when: false
         register: cntr_k8_003250_files
 
       - name: "MEDIUM | CNTR-K8-003250 | PATCH | The Kubernetes API Server must have file permissions set to 644 or more restrictive. | Set permissions"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: 0644
         with_items:
@@ -1512,13 +1580,13 @@
 - name: "MEDIUM | CNTR-K8-003340 | PATCH | The Kubernetes PKI keys must have file permissions set to 600 or more restrictive."
   block:
       - name: "MEDIUM | CNTR-K8-003340 | PATCH | The Kubernetes PKI keys must have file permissions set to 600 or more restrictive. | Get files"
-        find:
+        ansible.builtin.find:
             path: /etc/kubernetes/pki/
             patterns: '*.key'
         register: cntr_k8_003340_pki_key_files
 
       - name: "MEDIUM | CNTR-K8-003340 | PATCH | The Kubernetes PKI keys must have file permissions set to 600 or more restrictive. | Set permissions"
-        file:
+        ansible.builtin.file:
             path: "{{ item.path }}"
             mode: 0600
         with_items:
@@ -1558,24 +1626,6 @@
 
 - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts."
   block:
-      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Get parameter status if systemd"
-        ansible.builtin.shell: grep -is '[^\s]."KUBELET_EXTRA_ARGS' {{ kubelet_file }} | sed -n 's/.*"\(.*\)".*/\1/p'
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_001300_strm_con_idle_timeout_status_sysd
-        when: "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
-
-      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Get parameter status if kubelet file"
-        ansible.builtin.shell: grep -is '^KUBELET_EXTRA_ARGS' {{ kubelet_file }}
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_001300_strm_con_idle_timeout_status_kubelet
-        when: "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
-
-      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set variable for correct var"
-        ansible.builtin.set_fact:
-            cntr_k8_001300_strm_con_idle_timeout_status: "{{ cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout is defined | ternary(cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout, cntr_k8_001300_strm_con_idle_timeout_status_kubelet.stdout) }}"
-
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if both EXRA_ARGS and streaming connection exist"
         ansible.builtin.replace:
             path: "{{ kubelet_file }}"
@@ -1583,8 +1633,8 @@
             replace: streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
-            - "'streaming-connection-idle-timeout' in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'streaming-connection-idle-timeout' in cntrk8stig_kubelet_extra_args"
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS exist and not streaming connection"
         ansible.builtin.replace:
@@ -1593,8 +1643,8 @@
             replace: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }} '
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
-            - "'streaming-connection-idle-timeout' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'streaming-connection-idle-timeout' not in cntrk8stig_kubelet_extra_args"
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS don't exist for non-systemd configs"
         ansible.builtin.lineinfile:
@@ -1602,17 +1652,17 @@
             line: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}'
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
             - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS don't exist for systemd configs"
         ansible.builtin.lineinfile:
             path: "{{ kubelet_file }}"
-            line: 'Environment="KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout=5m"'
+            line: 'Environment="KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}"'
             insertafter: '\[Service\]'
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001300

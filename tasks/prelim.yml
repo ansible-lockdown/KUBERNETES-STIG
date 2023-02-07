@@ -1,0 +1,26 @@
+---
+- name: "PRELIM | Get Client version"
+  ansible.builtin.shell: kubectl version --short | grep "Client Version" | cut -d"v" -f2
+  changed_when: false
+  failed_when: false
+  register: cntrk8stig_kubectl_client_version
+
+- name: "PRELIM | Get Kublet Extra Args parameter"
+  block:
+      - name: "PRELIM | Get Kublet Extra Args parameter | status if systemd"
+        ansible.builtin.shell: grep -is '[^\s]."KUBELET_EXTRA_ARGS' {{ kubelet_file }} | sed -n 's/.*"\(.*\)".*/\1/p'
+        changed_when: false
+        failed_when: false
+        register: cntrk8stig_extra_args_status_sysd
+        when: "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
+
+      - name: "PRELIM | Get Kublet Extra Args parameter | status if kubelet file"
+        ansible.builtin.shell: grep -is '^KUBELET_EXTRA_ARGS' {{ kubelet_file }}
+        changed_when: false
+        failed_when: false
+        register: cntrk8stig_extra_args_status_kubelet
+        when: "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
+
+      - name: "PRELIM | Get Kublet Extra Args parameter | Set to usable variable"
+        ansible.builtin.set_fact:
+            cntrk8stig_kubelet_extra_args: "{{ cntrk8stig_extra_args_status_sysd.stdout is defined | ternary(cntrk8stig_extra_args_status_sysd.stdout, cntrk8stig_extra_args_status_kubelet.stdout) }}"
