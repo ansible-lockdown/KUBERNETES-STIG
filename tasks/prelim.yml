@@ -1,4 +1,5 @@
 ---
+
 - name: "PRELIM | Get Client version"
   ansible.builtin.shell: kubectl version --short | grep "Client Version" | cut -d"v" -f2
   changed_when: false
