@@ -7,7 +7,7 @@ This role is based on Kubernetes DISA STIG: [Version 1, Rel 6 released on  Jul 2
 
 ## Join us
 
-On our [Discord Server](https://discord.gg/JFxpSgPFEJ) to ask questions, discuss features, or just chat with other Ansible-Lockdown users
+On our [Discord Server](https://discord.io/ansible-lockdown) to ask questions, discuss features, or just chat with other Ansible-Lockdown users
 
 ## Updating
 
