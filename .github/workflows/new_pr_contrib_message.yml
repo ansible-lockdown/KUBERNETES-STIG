@@ -1,4 +1,4 @@
-# This is the workflow for sending a welcome message when a new contributor creates a new issue
+# This is the workflow for sending a welcome message when a new contributor creates a new pull request
 
 name: new_pr_contrib_message
 
