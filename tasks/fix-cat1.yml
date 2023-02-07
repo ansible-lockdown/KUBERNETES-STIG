@@ -62,14 +62,14 @@
 
       - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Convert to dictionary"
         ansible.builtin.set_fact:
-            cntr_k8_000330_original_kubelet_cfg: "{{ cntr_k8_000330_slurp.content|b64decode|from_yaml }}"
+            cntr_k8_000330_original_kubelet_cfg: "{{ cntr_k8_000330_slurp.content | b64decode | from_yaml }}"
 
       - name: "SHIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Add new value"
+        ansible.builtin.set_fact:
+            cntr_k8_000330_updated_kubelet_cfg: "{{ cntr_k8_000330_original_kubelet_cfg | combine(cntr_k8_000330_new_kubelet_cfg) }}"
         vars:
             cntr_k8_000330_new_kubelet_cfg:
                 readOnlyPort: 0
-        ansible.builtin.set_fact:
-            cntr_k8_000330_updated_kubelet_cfg: "{{ cntr_k8_000330_original_kubelet_cfg | combine(cntr_k8_000330_new_kubelet_cfg) }}"
         when: cntr_k8_000330_original_kubelet_cfg.readOnlyPort is not defined
 
       - name: "HIGH | CNTR-K8-000330 | AUDIT | The Kubernetes Kubelet must have the read-only port flag disabled. | Update existing value"
@@ -186,7 +186,9 @@
             cntr_k8_000380_updated_kubelet_cfg:
                 authorization:
                     mode: Webhook
-        when: cntr_k8_000380_original_kubelet_cfg.authorization.mode is defined and cntr_k8_000380_original_kubelet_cfg.authorization.mode != "Webhook"
+        when:
+            - cntr_k8_000380_original_kubelet_cfg.authorization.mode is defined
+            - cntr_k8_000380_original_kubelet_cfg.authorization.mode != "Webhook"
 
       - name: "HIGH | CNTR-K8-000380 | PATCH | The Kubernetes kubelet must enable explicit authorization. | Ensure that the --authorization-mode argument is not set to AlwaysAllow"
         ansible.builtin.copy:
@@ -263,7 +265,7 @@
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Convert to dictionary"
         ansible.builtin.set_fact:
-            cntr_k8_0162_original_kublet_cfg: "{{ cntr_k8_01620_slurped.content|b64decode|from_yaml }}"
+            cntr_k8_0162_original_kublet_cfg: "{{ cntr_k8_01620_slurped.content | b64decode | from_yaml }}"
 
       - name: "HIGH | CNTR-K8-001620 | PATCH | Kubernetes Kubelet must enable kernel protection. | Add new value"
         ansible.builtin.set_fact:
