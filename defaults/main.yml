@@ -111,6 +111,8 @@ cntr_k8_001300: true
 cntr_k8_002630: true
 cntr_k8_002640: true
 
+# General variables
+
 # cntrk8stig_ansible_managed_audit_policy is the toggle allow this role manage the audit-policy file
 # If set to true this will use the template located in templates/audit-policy.yaml.j2 as the audit policy
 # The path and filename to be used is in var cntrk8stig_api_server_audit_policy_file
@@ -134,8 +136,7 @@ etcd_pod_specification_file: "/etc/kubernetes/manifests/etcd.yaml"
 # kubelet_file is the path and filename of the kubelet file itself
 kubelet_file: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
 
-
-# Kubelet
+# Kubelet config file
 kubelet_config_file: "/var/lib/kubelet/config.yaml"
 
 cntrk8stig_kubelet_service_file: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
@@ -243,9 +244,6 @@ cntrk8stig_audit_log_maxage: 30
 # cntrk8stig_audit_log_path is the path to the audit log file
 # To conform to STIG standards this needs to point a valid location
 cntrk8stig_audit_log_path: "/var/log/kubernetes/audit/audit.log"
-
-# CNTR-K8-003350
-# cntrk8stig_kube
 
 # CNTR-K8-001300
 # cntrk8stig_stream_conn_idle_timeout is the Streaming Connection Idle Timeout value.
