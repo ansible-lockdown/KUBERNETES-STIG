@@ -1138,7 +1138,6 @@
       - V-242438
       - kube_api_server
 
-
 - name: "MEDIUM | CNTR-K8-002700 | PATCH | Kubernetes must remove old components after updated versions have been installed."
   ansible.builtin.shell: /bin/true
   changed_when: false
