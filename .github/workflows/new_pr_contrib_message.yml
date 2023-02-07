@@ -1,6 +1,6 @@
 # This is the workflow for sending a welcome message when a new contributor creates a new issue
 
-name: new_issue_contrib_message
+name: new_pr_contrib_message
 
 # Controls when the action will run.
 # Triggers the workflow on push or pull request
