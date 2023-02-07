@@ -1,6 +1,6 @@
 ---
 
-- name: "MEDIIUM | CNTR-K8-000150 | PATCH | The Kubernetes Controller Manager must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+- name: "MEDIUM | CNTR-K8-000150 | PATCH | The Kubernetes Controller Manager must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
   ansible.builtin.lineinfile:
       path: "{{ controller_manager_pod_specification_file }}"
       regexp: '^(\s+- --tls-min-version.*)$'
@@ -398,7 +398,7 @@
       - V-242401
       - kube_api_server
 
-- name: "MEDIIUM | CNTR-K8-000610 | PATCH | The Kubernetes API Server must have an audit log path set."
+- name: "MEDIUM | CNTR-K8-000610 | PATCH | The Kubernetes API Server must have an audit log path set."
   ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
       regexp: '^(\s+- --audit-log-path.*)$'
@@ -446,21 +446,14 @@
       - kube_api_server
 
 - name: "MEDIUM | CNTR-K8-000850 | PATCH | Kubernetes Kubelet must deny hostname override."
-  block:
-      - name: "MEDIUM | CNTR-K8-000850 | AUDIT | Kubernetes Kubelet must deny hostname override. | Chekc for /etc/sysconfig/kublet file"
-        ansible.builtin.stat:
-            path: /etc/sysconfig/kubelet
-        register: cntr_k8_000850_kublet_status
-
-      - name: "MEDIUM | CNTR-K8-000850 | PATCH | Kubernetes Kubelet must deny hostname override. | Remove if file exists"
-        ansible.builtin.lineinfile:
-            path: /etc/sysconfig/kubelet
-            regexp: '--hostname-override'
-            state: absent
-        notify: kubelet restart
-        when: cntr_k8_000850_kublet_status.stat.exists
+  ansible.builtin.lineinfile:
+      path: /etc/sysconfig/kubelet
+      regexp: '--hostname-override'
+      state: absent
+  notify: kubelet restart
   when:
       - cntr_k8_000850
+      - cntr_k8_000850_kublet_status.stat.exists
   tags:
       - CNTR-K8-000850
       - CAT2
@@ -794,6 +787,7 @@
       regexp: '^(\s+- --client-ca-file=.*)$'
       line: "    - --client-ca-file={{ cntrk8stig_kubeapi_client_ca_file }}"
       insertafter: '^\s+- kube-apiserver$'
+  notify: kubelet restart
   when:
       - cntr_k8_001410
       - kubernetes_master
@@ -822,12 +816,15 @@
       - SV-242420r799987_rule
       - V-242420
       - kubelet
-      - not_implemented_yet
+      - not_implemented
 
 - name: "MEDIUM | CNTR-K8-001430 | PATCH | Kubernetes Controller Manager must have the SSL Certificate Authority set."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --root-ca-file=.*)$'
+      line: "    - --root-ca-file={{ cntrk8stig_kubeapi_root_ca_file }}"
+      insertafter: '^\s+- kube-apiserver'
+  notify: kubelet restart
   when:
       - cntr_k8_001430
       - kubernetes_master
@@ -839,12 +836,18 @@
       - SV-242421r717033_rule
       - V-242421
       - kube_control_manager
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001440 | PATCH |  Kubernetes API Server must have a certificate for communication."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+      insertafter: '^\s+- kube-apiserver'
+  with_items:
+      - { regexp: '^(\s+- --tls-cert-file=.*)$', line: "    - --tls-cert-file={{ cntrk8stig_tls_cert_file }}" }
+      - { regexp: '^(\s+- --tls-private-key-file=.*)$', line: "    - --tls-private-key-file={{ cntrk8stig_tls_privkey_file }}" }
+  loop_control:
+      label: "{{ item.line }}"
   when:
       - cntr_k8_001440
       - kubernetes_master
@@ -856,12 +859,13 @@
       - SV-242422r712622_rule
       - V-242422
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001450 | PATCH | Kubernetes etcd must enable client authentication to secure service."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --client-cert-auth=.*)$'
+      line: "    - --client-cert-auth=true"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001450
       - kubernetes_master
@@ -873,15 +877,51 @@
       - SV-242423r808580_rule
       - V-242423
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  block:
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if both EXRA_ARGS and streaming connection exist"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'tls-private-key-file=([\S])([^"])'
+            replace: tls-private-key-file={{ cntrk8stig_tls_privkey_file }}
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-private-key-file' in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if EXRA_ARGS exist and not streaming connection"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'KUBELET_EXTRA_ARGS='
+            replace: 'KUBELET_EXTRA_ARGS=--tls-private-key-file={{ cntrk8stig_tls_privkey_file }} '
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-private-key-file' not in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for non-systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'KUBELET_EXTRA_ARGS=--tls-private-key-file={{ cntrk8stig_tls_privkey_file }}'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
+
+      - name: "MEDIUM | CNTR-K8-001460 | PATCH | Kubernetes Kubelet must enable tls-private-key-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'Environment="KUBELET_EXTRA_ARGS=--tls-private-key-file={{ cntrk8stig_tls_privkey_file }}"'
+            insertafter: '\[Service\]'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001460
       - kubernetes_master
+      - cntrk8stig_kublet_file_exists.stat.exists
   tags:
       - CNTR-K8-001460
       - CAT2
@@ -890,12 +930,47 @@
       - SV-242424r825890_rule
       - V-242424
       - kubelet
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  block:
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if both EXRA_ARGS and streaming connection exist"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'tls-cert-file=([\S])([^"])'
+            replace: tls-cert-file={{ cntrk8stig_tls_cert_file }}
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-cert-file' in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if EXRA_ARGS exist and not streaming connection"
+        ansible.builtin.replace:
+            path: "{{ kubelet_file }}"
+            regexp: 'KUBELET_EXTRA_ARGS='
+            replace: 'KUBELET_EXTRA_ARGS=--tls-cert-file={{ cntrk8stig_tls_cert_file }} '
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'tls-cert-file' not in cntrk8stig_kubelet_extra_args"
+
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for non-systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'KUBELET_EXTRA_ARGS=--tls-cert-file={{ cntrk8stig_tls_cert_file }}'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
+
+      - name: "MEDIUM | CNTR-K8-001470 | PATCH | Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service. | Set if EXRA_ARGS don't exist for systemd configs"
+        ansible.builtin.lineinfile:
+            path: "{{ kubelet_file }}"
+            line: 'Environment="KUBELET_EXTRA_ARGS=--tls-cert-file={{ cntrk8stig_tls_cert_file }}"'
+            insertafter: '\[Service\]'
+        notify: kubelet restart
+        when:
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
+            - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001470
       - kubernetes_master
@@ -907,12 +982,13 @@
       - SV-242425r825892_rule
       - V-242425
       - kubelet
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001480 | PATCH | Kubernetes etcd must enable client authentication to secure service."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --peer-client-cert-auth=.*)$'
+      line: "    - --peer-client-cert-auth=true"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001480
       - kubernetes_master
@@ -924,12 +1000,13 @@
       - SV-242426r821607_rule
       - V-242426
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001490 | PATCH | Kubernetes etcd must have a key file for secure communication."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --key-file=.*)$'
+      line: "    - --key-file={{ cntrk8stig_tls_privkey_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001490
       - kubernetes_master
@@ -941,12 +1018,13 @@
       - SV-242427r808583_rule
       - V-242427
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001500 | PATCH | Kubernetes etcd must have a certificate for communication."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --cert-file=.*)$'
+      line: "    - --cert-file={{ cntrk8stig_tls_cert_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001500
       - kubernetes_master
@@ -961,9 +1039,11 @@
       - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001510 | PATCH | Kubernetes etcd must have the SSL Certificate Authority set."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --etcd-cafile=.*)$'
+      line: "    - --etcd-cafile={{ cntrk8stig_etcd_catfile }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001510
       - kubernetes_master
@@ -975,12 +1055,13 @@
       - SV-242429r808589_rule
       - V-242429
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001520 | PATCH | Kubernetes etcd must have a certificate for communication."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --etcd-certfile=.*)$'
+      line: "    - --etcd-certfile={{ cntrk8stig_etcd_certfile }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001520
       - kubernetes_master
@@ -992,12 +1073,13 @@
       - SV-242430r808592_rule
       - V-242430
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001530 | PATCH | Kubernetes etcd must have a key file for secure communication."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --etcd-keyfile=.*)$'
+      line: "    - --etcd-keyfile={{ cntrk8stig_etcd_keyfile }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001530
       - kubernetes_master
@@ -1009,12 +1091,13 @@
       - SV-242431r808595_rule
       - V-242431
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001540 | PATCH | Kubernetes etcd must have peer-cert-file set for secure communication."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --peer-cert-file=.*)$'
+      line: "    - --peer-cert-file={{ cntrk8stig_etcd_peercert_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001540
       - kubernetes_master
@@ -1026,12 +1109,13 @@
       - SV-242432r808597_rule
       - V-242432
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001550 | PATCH | Kubernetes etcd must have a peer-key-file set for secure communication."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ etcd_pod_specification_file }}"
+      regexp: '^(\s+- --peer-key-file=.*)$'
+      line: "    - --peer-key-file={{ cntrk8stig_etcd_peerkey_file }}"
+      insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001550
       - kubernetes_master
@@ -1043,12 +1127,13 @@
       - SV-242433r808599_rule
       - V-242433
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-002600 | PATCH | Kubernetes API Server must configure timeouts to limit attack surface."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+  ansible.builtin.lineinfile:
+      path: "{{ api_server_pod_specification_file }}"
+      regexp: '^(\s+- --request-timeout=.*)$'
+      line: "    - --request-timeoute={{ cntrk8stig_api_request_timeout }}"
+      insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_002600
       - kubernetes_master
@@ -1060,7 +1145,7 @@
       - SV-242438r754802_rule
       - V-242438
       - kube_api_server
-      - not_implemented_yet
+
 
 - name: "MEDIUM | CNTR-K8-002700 | PATCH | Kubernetes must remove old components after updated versions have been installed."
   ansible.builtin.shell: /bin/true
@@ -1250,40 +1335,29 @@
       - V-242448
       - permissions
 
-- name: "MEDIUM | CNTR-K8-003160 | PATCH | The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
+- name: |
+    "MEDIUM | CNTR-K8-003160 | PATCH | The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive."
+    "MEDIUM | CNTR-K8-003170 | PATCH | The Kubernetes Kubelet certificate authority must be owned by root."
+  ansible.builtin.file:
+      path: "{{ cntrk8stig_kubeapi_client_ca_file }}"
+      mode: "{{ cntr_k8_003160 | ternary('0644',omit) }}"
+      owner: "{{ cntr_k8_003170 | ternary('root',omit) }}"
+      group: "{{ cntr_k8_003170 | ternary('root',omit) }}"
   when:
-      - cntr_k8_003160
+      - cntr_k8_003160 or
+        cntr_k8_003170
       - kubernetes_master
   tags:
       - CNTR-K8-003160
-      - CAT2
-      - CCI-000366
-      - SRG-APP-000516-CTR-001325
-      - SV-242449r821614_rule
-      - V-242449
-      - permissions
-      - not_implemented_yet
-
-
-- name: "MEDIUM | CNTR-K8-003170 | PATCH | The Kubernetes Kubelet certificate authority must be owned by root."
-  ansible.builtin.shell: /bin/true
-  changed_when: false
-  failed_when: false
-  when:
-      - cntr_k8_003170
-      - kubernetes_master
-  tags:
       - CNTR-K8-003170
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001325
+      - SV-242449r821614_rule
       - SV-242450r754804_rule
+      - V-242449
       - V-242450
       - permissions
-      - not_implemented_yet
 
 - name: |
     "MEDIUM | CNTR-K8-003180 | PATCH | The Kubernetes component PKI must be owned by root."
@@ -1558,24 +1632,6 @@
 
 - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts."
   block:
-      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Get parameter status if systemd"
-        ansible.builtin.shell: grep -is '[^\s]."KUBELET_EXTRA_ARGS' {{ kubelet_file }} | sed -n 's/.*"\(.*\)".*/\1/p'
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_001300_strm_con_idle_timeout_status_sysd
-        when: "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
-
-      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Get parameter status if kubelet file"
-        ansible.builtin.shell: grep -is '^KUBELET_EXTRA_ARGS' {{ kubelet_file }}
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_001300_strm_con_idle_timeout_status_kubelet
-        when: "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
-
-      - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set variable for correct var"
-        ansible.builtin.set_fact:
-            cntr_k8_001300_strm_con_idle_timeout_status: "{{ cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout is defined | ternary(cntr_k8_001300_strm_con_idle_timeout_status_sysd.stdout, cntr_k8_001300_strm_con_idle_timeout_status_kubelet.stdout) }}"
-
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if both EXRA_ARGS and streaming connection exist"
         ansible.builtin.replace:
             path: "{{ kubelet_file }}"
@@ -1583,8 +1639,8 @@
             replace: streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
-            - "'streaming-connection-idle-timeout' in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'streaming-connection-idle-timeout' in cntrk8stig_kubelet_extra_args"
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS exist and not streaming connection"
         ansible.builtin.replace:
@@ -1593,8 +1649,8 @@
             replace: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }} '
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' in cntr_k8_001300_strm_con_idle_timeout_status"
-            - "'streaming-connection-idle-timeout' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' in cntrk8stig_kubelet_extra_args"
+            - "'streaming-connection-idle-timeout' not in cntrk8stig_kubelet_extra_args"
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS don't exist for non-systemd configs"
         ansible.builtin.lineinfile:
@@ -1602,17 +1658,17 @@
             line: 'KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}'
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
             - "'/etc/systemd/system/kubelet.service.d' not in kubelet_file"
 
       - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts. | Set if EXRA_ARGS don't exist for systemd configs"
         ansible.builtin.lineinfile:
             path: "{{ kubelet_file }}"
-            line: 'Environment="KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout=5m"'
+            line: 'Environment="KUBELET_EXTRA_ARGS=--streaming-connection-idle-timeout={{ cntrk8stig_stream_conn_idle_timeout }}"'
             insertafter: '\[Service\]'
         notify: kubelet restart
         when:
-            - "'KUBELET_EXTRA_ARGS' not in cntr_k8_001300_strm_con_idle_timeout_status"
+            - "'KUBELET_EXTRA_ARGS' not in cntrk8stig_kubelet_extra_args"
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001300
