@@ -1311,7 +1311,7 @@
             path: "{{ proxy_kubeconfig_file }}"
             mode: "{{ cntr_k8_003140 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_003150 | ternary('root',omit) }}"
-            gropu: "{{ cntr_k8_003150 | ternary('root',omit) }}"
+            group: "{{ cntr_k8_003150 | ternary('root',omit) }}"
         when: cntr_k8_003140_proxy_config_file_status.stat.exists
   when:
       - cntr_k8_003140 or
