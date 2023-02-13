@@ -219,7 +219,6 @@ cntrk8stig_tls_cert_file: "/etc/kubernetes/pki/apiserver.crt"
 # to conform to STIG standards please point to an approved organizational certificate
 cntrk8stig_tls_privkey_file: "/etc/kubernetes/pki/apiserver.key"
 
-
 # CNTR-K8-003280
 # cntrk8stig_kubeapi_audit_policy_file is the path to the audit policy config file
 # This needs to be configured to be STIG compliant
