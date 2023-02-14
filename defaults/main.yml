@@ -9,7 +9,7 @@ cntrk8stig_cat3_patch: true
 # however the time you run this role might not be the best time to reboot, so we allow flexability
 cntrk8stig_skip_reboot: true
 
-kubernetes_master: true
+cntrk8stig_control_plane: true
 
 # These variables correspond with the STIG IDs defined in the STIG and allows you to enable/disable specific rules.
 # PLEASE NOTE: These work in coordination with the cat1, cat2, cat3 group variables. You must enable an entire group
