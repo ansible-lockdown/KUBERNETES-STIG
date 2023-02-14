@@ -9,7 +9,7 @@ cntrk8stig_cat3_patch: true
 # however the time you run this role might not be the best time to reboot, so we allow flexability
 cntrk8stig_skip_reboot: true
 
-kubernetes_master: true
+cntrk8stig_control_plane: true
 
 # These variables correspond with the STIG IDs defined in the STIG and allows you to enable/disable specific rules.
 # PLEASE NOTE: These work in coordination with the cat1, cat2, cat3 group variables. You must enable an entire group
@@ -218,7 +218,6 @@ cntrk8stig_tls_cert_file: "/etc/kubernetes/pki/apiserver.crt"
 # cntrk8stig_tls_privkey_file is the tls certificates private key path and file
 # to conform to STIG standards please point to an approved organizational certificate
 cntrk8stig_tls_privkey_file: "/etc/kubernetes/pki/apiserver.key"
-
 
 # CNTR-K8-003280
 # cntrk8stig_kubeapi_audit_policy_file is the path to the audit policy config file

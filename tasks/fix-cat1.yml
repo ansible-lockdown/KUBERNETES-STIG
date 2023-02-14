@@ -8,13 +8,13 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000220
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-000220
       - CAT1
       - CCI-000015
       - SRG-APP-000023-CTR-000055
-      - SV-242381r799981_rule
+      - SV-242381r863957_rule
       - V-242381
       - master
       - kube_control_manager
@@ -42,13 +42,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000320
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-000320
       - CAT1
       - CCI-000213
       - SRG-APP-000033-CTR-000095
-      - SV-242386r808574_rule
+      - SV-242386r863962_rule
       - V-242386
       - master
       - api_server
@@ -91,13 +91,13 @@
         when: cntr_k8_000330_updated_kubelet_cfg is defined
   when:
       - cntr_k8_000330
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-000330
       - CAT1
       - CCI-000213
       - SRG-APP-000033-CTR-000095
-      - SV-242387r717013_rule
+      - SV-242387r863963_rule
       - V-242387
       - master
       - kubelet
@@ -109,13 +109,13 @@
       state: absent
   when:
       - cntr_k8_000340
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-000340
       - CAT1
       - CCI-000213
       - SRG-APP-000033-CTR-000095
-      - SV-242388r712520_rule
+      - SV-242388r863964_rule
       - V-242388
       - master
       - api_server
@@ -128,13 +128,13 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_000360
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-000360
       - CAT1
       - CCI-000213
       - SRG-APP-000033-CTR-000100
-      - SV-242390r712526_rule
+      - SV-242390r863966_rule
       - V-242390
       - master
       - api_server
@@ -148,13 +148,13 @@
   notify: kubelet restart
   when:
       - cntr_k8_000370
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-000370
       - CAT1
       - CCI-000213
       - SRG-APP-000033-CTR-000090
-      - SV-242391r712529_rule
+      - SV-242391r863967_rule
       - V-242391
       - master
       - kubelet
@@ -199,12 +199,13 @@
         when: cntr_k8_000380_updated_kubelet_cfg is defined
   when:
       - cntr_k8_000380
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-000380
       - CAT1
       - CCI-000213
       - SRG-APP-000033-CTR-000095
-      - SV-242392r712532_rule
+      - SV-242392r863968_rule
       - V-242392
       - kubelet
 
@@ -221,7 +222,7 @@
       - CAT1
       - CCI-000213
       - SRG-APP-000033-CTR-000090
-      - SV-242397r712547_rule
+      - SV-242397r863973_rule
       - V-242397
       - kubelet
 
@@ -247,12 +248,13 @@
         when: cntr_k8_001160_secret_env_vars | length >= 1
   when:
       - cntr_k8_001160
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-001160
       - CAT1
       - CCI-000196
       - SRG-APP-000171-CTR-000435
-      - SV-242415r712601_rule
+      - SV-242415r863991_rule
       - V-242415
       - secrets
 
@@ -293,13 +295,13 @@
         when: cntr_k8_01620_updated_kubelet_cfg is defined
   when:
       - cntr_k8_001620
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-001620
       - CAT1
       - CCI-001084
       - SRG-APP-000233-CTR-000585
-      - SV-242434r825894_rule
+      - SV-242434r864009_rule
       - V-242434
       - kubelet
       - kernel
@@ -312,7 +314,7 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_001990
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-001990
       - CAT1
@@ -320,7 +322,7 @@
       - CCI-001812
       - CCI-002235
       - SRG-APP-000340-CTR-000770
-      - SV-242435r712661_rule
+      - SV-242435r864010_rule
       - V-24243
       - api_server
 
@@ -332,13 +334,13 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_002000
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-002000
       - CAT1
       - CCI-002233
       - SRG-APP-000342-CTR-000775
-      - SV-242436r712664_rule
+      - SV-242436r864011_rule
       - V-242436
       - kubelet
 
@@ -355,13 +357,13 @@
         failed_when: false
   when:
       - cntr_k8_002010
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-002010
       - CAT1
       - CCI-002233
       - SRG-APP-000342-CTR-000775
-      - SV-242437r821610_rule
+      - SV-242437r864012_rule
       - V-242437
       - pod
       - security_policy
@@ -373,11 +375,11 @@
       state: absent
   when:
       - cntr_k8_002620
-      - kubernetes_master
+      - cntr8stig_control_plane
   tags:
       - CNTR-K8-002620
       - CAT1
       - CCI-002418
       - SRG-APP-000439-CTR-001080
-      - SV-245542r754891_rule
+      - SV-245542r864033_rule
       - V-245542
