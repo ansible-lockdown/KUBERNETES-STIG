@@ -8,7 +8,7 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000150
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000150
       - CAT2
@@ -27,7 +27,7 @@
       insertafter: '^\s+- kube-scheduler'
   when:
       - cntr_k8_000160
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000160
       - CAT2
@@ -47,7 +47,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000170
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000170
       - CAT2
@@ -69,7 +69,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_000180
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000180
       - CAT2
@@ -87,7 +87,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_000190
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000190
       - CAT2
@@ -105,7 +105,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000270
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000270
       - CAT2
@@ -123,7 +123,7 @@
       insertafter: '^\s+- kube-scheduler'
   when:
       - cntr_k8_000300
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000300
       - CAT2
@@ -141,7 +141,7 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000310
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000310
       - CAT2
@@ -159,7 +159,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000350
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000350
       - CAT2
@@ -177,7 +177,7 @@
       state: stopped
       enabled: false
   when:
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
       - "'sshd' in ansible_facts.packages"
       - cntr_k8_000400 or
         cntr_k8_000410
@@ -242,22 +242,14 @@
       - kubectl
 
 - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
-  block:
-      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates files"
-        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet | cut -d":" -f1
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000450_feature_gates_files
-
-      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Update DynamicAuditing"
-        ansible.builtin.replace:
-            path: "{{ item }}"
-            regexp: 'DynamicAuditing=true'
-            replace: "DynamicAuditing=false"
-        with_items:
-            - "{{ cntr_k8_000450_feature_gates_files.stdout_lines }}"
-        when: cntr_k8_000450_feature_gates_files.stdout | length >=1
+  ansible.builtin.replace:
+      path: "{{ item.path }}"
+      regexp: 'DynamicAuditing=true'
+      replace: "DynamicAuditing=false"
+  with_items:
+      - "{{ cntrk8stig_split_fg }}"
   when:
+      - cntrk8stig_split_fg is defined
       - cntr_k8_000450
   tags:
       - CNTR-K8-000450
@@ -270,25 +262,6 @@
 
 - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled."
   block:
-      - name: "MEDIUM | CNTR-K8-000450 | AUDIT | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates"
-        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000460_feature_gates
-
-      - name: "MEDIUM | CNTR-K8-000460 | AUDIT | Kubernetes DynamicKubeletConfig must not be enabled. | Split Get feature-gates values"
-        ansible.builtin.set_fact:
-            cntr_k8_000450_split_fg: "{{ cntr_k8_000450_feature_gates.stdout_lines | map('regex_replace', ld_passwd_regex, ld_passwd_yaml) | map('from_yaml') | list }}"
-        vars:
-            ld_passwd_regex: >-
-                ^(?P<path>[^:]*):(?P<entry>[^:]*)
-            ld_passwd_yaml: |
-                path: >-4
-                    \g<path>
-                entry: >-4
-                    \g<entry>
-        when: cntr_k8_000450_feature_gates.stdout | length >= 1
-
       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Update DynamicKubeletConfig"
         ansible.builtin.replace:
             path: "{{ item.path }}"
@@ -296,10 +269,8 @@
             replace: "DynamicKubeletConfig=false"
         notify: kubelet restart
         with_items:
-            - "{{ cntr_k8_000450_split_fg }}"
-        when:
-            - cntr_k8_000450_feature_gates.stdout | length >= 1
-            - "'DynamicKubeletConfig=true' in item.entry"
+            - "{{ cntrk8stig_split_fg }}"
+        when: "'DynamicKubeletConfig=true' in item.entry"
 
       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Add DynamicKubeletConfig"
         ansible.builtin.lineinfile:
@@ -309,15 +280,14 @@
             insertafter: '^\s+- kube-apiserver'
         notify: kubelet restart
         with_items:
-            - "{{ cntr_k8_000450_split_fg }}"
+            - "{{ cntrk8stig_split_fg }}"
         loop_control:
             label: "{{ item.path }}"
-        when:
-            - cntr_k8_000450_feature_gates.stdout | length >= 1
-            - "'DynamicKubeletConfig=' not in item.entry"
+        when: "'DynamicKubeletConfig=' not in item.entry"
   when:
+      - cntrk8stig_split_fg is defined
       - cntr_k8_000460
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000460
       - CAT2
@@ -328,42 +298,20 @@
       - feature_gates
 
 - name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled."
-  block:
-      - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Get feature-gate paths and entries"
-        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/*
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000470_feature_gates
-
-      - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Split Get feature-gates values"
-        ansible.builtin.set_fact:
-            cntr_k8_000470_split_fg: "{{ cntr_k8_000470_feature_gates.stdout_lines | map('regex_replace', split_000470_regex, split_000470_yaml) | map('from_yaml') | list }}"
-        vars:
-            split_000470_regex: >-
-                ^(?P<path>[^:]*):(?P<entry>[^:]*)
-            split_000470_yaml: |
-                path: >-4
-                    \g<path>
-                entry: >-4
-                    \g<entry>
-        when: cntr_k8_000470_feature_gates.stdout | length >= 1
-
-      - name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled. | Update AllAlpha"
-        ansible.builtin.replace:
-            path: "{{ item.path }}"
-            regexp: 'AllAlpha=true'
-            replace: 'AllAlpha=false'
-        notify: kubelet restart
-        with_items:
-            - "{{ cntr_k8_000470_split_fg }}"
-        loop_control:
-            label: "{{ item.path }}"
-        when:
-            - cntr_k8_000470_feature_gates.stdout | length >=1
-            - "'AllAlpha=true' in item.entry"
+  ansible.builtin.replace:
+      path: "{{ item.path }}"
+      regexp: 'AllAlpha=true'
+      replace: 'AllAlpha=false'
+  notify: kubelet restart
+  with_items:
+      - "{{ cntrk8stig_split_fg }}"
+  loop_control:
+      label: "{{ item.path }}"
   when:
+      - cntrk8stig_split_fg is defined
       - cntr_k8_000470
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
+      - "'AllAlpha=true' in item.entry"
   tags:
       - CNTR-K8-000470
       - CAT2
@@ -381,7 +329,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000600
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000600
       - CAT2
@@ -399,7 +347,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000610
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000610
       - CAT2
@@ -415,7 +363,7 @@
       dest: "{{ cntrk8stig_api_server_audit_policy_file }}"
   when:
       - cntr_k8_000700
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
       - cntrk8stig_ansible_managed_audit_policy
   tags:
       - CNTR-K8-000700
@@ -484,7 +432,7 @@
   when:
       - cntr_k8_000860 or
         cntr_k8_000900
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000860
       - CNTR-K8-000900
@@ -521,7 +469,7 @@
   when:
       - cntr_k8_000880 or
         cntr_k8_000890
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000880
       - CNTR-K8-000890
@@ -543,7 +491,7 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000910
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000910
       - CAT2
@@ -591,7 +539,7 @@
             warn_control_id: 'CNTR-K8-000920'
   when:
       - cntr_k8_000920
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000920
       - CAT2
@@ -639,7 +587,7 @@
             warn_control_id: 'CNTR-K8-000930'
   when:
       - cntr_k8_000930
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000930
       - CAT2
@@ -678,7 +626,7 @@
             warn_control_id: 'CNTR-K8-000940'
   when:
       - cntr_k8_000940
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000940
       - CAT2
@@ -710,7 +658,7 @@
             warn_control_id: 'CNTR-K8-000940'
   when:
       - cntr_k8_000950
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000950
       - CAT2
@@ -726,7 +674,7 @@
   failed_when: false
   when:
       - cntr_k8_000960
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000960
       - CAT2
@@ -743,7 +691,7 @@
   failed_when: false
   when:
       - cntr_k8_001360
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001360
       - CAT2
@@ -762,7 +710,7 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_001400
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001400
       - CAT2
@@ -782,7 +730,7 @@
   notify: kubelet restart
   when:
       - cntr_k8_001410
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001410
       - CAT2
@@ -799,7 +747,7 @@
   failed_when: false
   when:
       - cntr_k8_001420
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001420
       - CAT2
@@ -819,7 +767,7 @@
   notify: kubelet restart
   when:
       - cntr_k8_001430
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001430
       - CAT2
@@ -842,7 +790,7 @@
       label: "{{ item.line }}"
   when:
       - cntr_k8_001440
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001440
       - CAT2
@@ -860,7 +808,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001450
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001450
       - CAT2
@@ -912,7 +860,7 @@
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001460
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001460
       - CAT2
@@ -964,7 +912,7 @@
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001470
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001470
       - CAT2
@@ -982,7 +930,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001480
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001480
       - CAT2
@@ -1000,7 +948,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001490
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001490
       - CAT2
@@ -1018,7 +966,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001500
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001500
       - CAT2
@@ -1036,7 +984,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001510
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001510
       - CAT2
@@ -1054,7 +1002,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001520
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001520
       - CAT2
@@ -1072,7 +1020,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001530
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001530
       - CAT2
@@ -1090,7 +1038,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001540
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001540
       - CAT2
@@ -1108,7 +1056,7 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001550
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001550
       - CAT2
@@ -1118,6 +1066,47 @@
       - V-242433
       - kube_etcd
 
+- name: "MEDIUM | CNTR-K8-002001 | PATCH | Kubernetes must have a Pod Security Admission feature gate set."
+  ansible.builtin.debug:
+      msg:
+          - "Warning! This is a manual task"
+          - "Please make sure PodScurity is set to true in every Kubernetes config file"
+  when:
+      - cntr_k8_002001
+  tags:
+      - CNTR-K8-002001
+      - CAT2
+      - CCI-002263
+      - SRG-APP-000342-CTR-000775
+      - SV-254801r864044_rule
+      - V-254801
+      - kubelet
+      - not_implemented
+
+- name: "MEDIUM | CNTR-K8-002011 | PATCH | Kubernetes must have a Pod Security Admission control file configured."
+  block:
+      - name: "MEDIUM | CNTR-K8-002011 | PATCH | Kubernetes must have a Pod Security Admission control file configured. | Set --admission-control-config-file"
+        ansible.builtin.lineinfile:
+            path: "{{ api_server_pod_specification_file }}"
+            regexp: '^(\s+- --admission-control-config-file=.*)$'
+            line: "    - --admission-control-config-file={{ cntrk8stig_admission_cntrl_cnfg_file }}"
+            insertafter: '^\s+- kube-apiserver'
+
+      - name: "MEDIUM | CNTR-K8-002011 | PATCH | Kubernetes must have a Pod Security Admission control file configured. | Create Admission Control Config file if needed"
+        ansible.builtin.template:
+            src: admission_control_config_file.yaml.j2
+            dest: "{{ cntrk8stig_admission_cntrl_cnfg_file }}"
+        when: cntrk8stig_admission_cntrl_confg_create
+  when:
+      - cntr_k8_002011
+  tags:
+      - CNTR-K8-002011
+      - CAT2
+      - CCI-002263
+      - SRG-APP-000342-CTR-000775
+      - SV-254800r864040_rule
+      - V-254800
+
 - name: "MEDIUM | CNTR-K8-002600 | PATCH | Kubernetes API Server must configure timeouts to limit attack surface."
   ansible.builtin.lineinfile:
       path: "{{ api_server_pod_specification_file }}"
@@ -1126,7 +1115,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_002600
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002600
       - CAT2
@@ -1142,7 +1131,7 @@
   failed_when: false
   when:
       - cntr_k8_002700
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002700
       - CAT2
@@ -1168,7 +1157,7 @@
         when: cntrk8stig_kubectl_client_version.stdout is version('1.16.7', '<=')
   when:
       - cntr_k8_002720
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002720
       - CAT2
@@ -1338,7 +1327,7 @@
   when:
       - cntr_k8_003160 or
         cntr_k8_003170
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003160
       - CNTR-K8-003170
@@ -1493,7 +1482,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003280
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003280
       - CAT2
@@ -1511,7 +1500,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003290
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003290
       - CAT2
@@ -1529,7 +1518,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003300
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003300
       - CAT2
@@ -1547,7 +1536,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003310
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003310
       - CAT2
@@ -1565,7 +1554,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003320
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003320
       - CAT2
@@ -1611,7 +1600,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003350
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003350
       - CAT2
@@ -1663,7 +1652,7 @@
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001300
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001300
       - CAT2
@@ -1680,7 +1669,7 @@
       state: absent
   when:
       - cntr_k8_002630
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002630
       - CAT2
@@ -1702,7 +1691,7 @@
       label: "{{ item.line }}"
   when:
       - cntr_k8_002640
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002640
       - CAT2

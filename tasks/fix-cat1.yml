@@ -8,7 +8,7 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000220
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000220
       - CAT1
@@ -42,7 +42,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000320
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000320
       - CAT1
@@ -91,7 +91,7 @@
         when: cntr_k8_000330_updated_kubelet_cfg is defined
   when:
       - cntr_k8_000330
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000330
       - CAT1
@@ -109,7 +109,7 @@
       state: absent
   when:
       - cntr_k8_000340
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000340
       - CAT1
@@ -128,7 +128,7 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_000360
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000360
       - CAT1
@@ -148,7 +148,7 @@
   notify: kubelet restart
   when:
       - cntr_k8_000370
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000370
       - CAT1
@@ -199,7 +199,7 @@
         when: cntr_k8_000380_updated_kubelet_cfg is defined
   when:
       - cntr_k8_000380
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000380
       - CAT1
@@ -248,7 +248,7 @@
         when: cntr_k8_001160_secret_env_vars | length >= 1
   when:
       - cntr_k8_001160
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001160
       - CAT1
@@ -295,7 +295,7 @@
         when: cntr_k8_01620_updated_kubelet_cfg is defined
   when:
       - cntr_k8_001620
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001620
       - CAT1
@@ -314,7 +314,7 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_001990
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001990
       - CAT1
@@ -334,7 +334,7 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_002000
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002000
       - CAT1
@@ -357,7 +357,7 @@
         failed_when: false
   when:
       - cntr_k8_002010
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002010
       - CAT1
@@ -375,7 +375,7 @@
       state: absent
   when:
       - cntr_k8_002620
-      - cntr8stig_control_plane
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002620
       - CAT1

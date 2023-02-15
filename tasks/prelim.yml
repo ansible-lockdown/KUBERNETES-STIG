@@ -6,6 +6,31 @@
   failed_when: false
   register: cntrk8stig_kubectl_client_version
 
+- name: "PRELIM | Get feature-gates files and entries"
+  block:
+      - name: "PRELIM | Get feature-gates files | Search for feature-gates config"
+        ansible.builtin.shell: "grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet"
+        changed_when: false
+        failed_when: false
+        register: cntrk8stig_feature_gates
+
+      - name: "PRELIM | Get feature-gates files | Split Get feature-gates values"
+        ansible.builtin.set_fact:
+            cntrk8stig_split_fg: "{{ cntrk8stig_feature_gates.stdout_lines | map('regex_replace', ld_passwd_regex, ld_passwd_yaml) | map('from_yaml') | list }}"
+        vars:
+            ld_passwd_regex: >-
+                ^(?P<path>[^:]*):(?P<entry>[^:]*)
+            ld_passwd_yaml: |
+                path: >-4
+                    \g<path>
+                entry: >-4
+                    \g<entry>
+        when: cntrk8stig_feature_gates.stdout | length >= 1
+  when:
+      - cntr_k8_000450 or
+        cntr_k8_000460 or
+        cntr_k8_000470
+
 - name: "PRELIM | Get Kublet Extra Args parameter"
   block:
       - name: "PRELIM | Get Kublet Extra Args parameter | status if systemd"
