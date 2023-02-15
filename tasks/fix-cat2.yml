@@ -8,13 +8,13 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000150
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000150
       - CAT2
       - CCI-000068
       - SRG-APP-000014-CTR-000035
-      - SV-242376r712484_rule
+      - SV-242376r863952_rule
       - V-242376
       - ssh
       - kube_control_manager
@@ -27,13 +27,13 @@
       insertafter: '^\s+- kube-scheduler'
   when:
       - cntr_k8_000160
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000160
       - CAT2
       - CCI-000068
       - SRG-APP-000014-CTR-000035
-      - SV-242377r712487_rule
+      - SV-242377r863953_rule
       - V-242377
       - kube_scheduler
 
@@ -47,7 +47,7 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000170
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000170
       - CAT2
@@ -55,7 +55,7 @@
       - CCI-001453
       - SRG-APP-000014-CTR-000040
       - SRG-APP-000560-CTR-001340
-      - SV-242378r712490_rule
+      - SSV-242378r863954_rule
       - SV-242468r712760_rule
       - V-242378
       - V-242468
@@ -69,13 +69,13 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_000180
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000180
       - CAT2
       - CCI-000068
       - SRG-APP-000014-CTR-000035
-      - SV-242379r754799_rule
+      - SV-242379r863955_rule
       - V-242379
       - kube_etcd
 
@@ -87,13 +87,13 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_000190
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000190
       - CAT2
       - CCI-000068
       - SRG-APP-000014-CTR-000035
-      - SV-242380r754800_rule
+      - SV-242380r863956_rule
       - V-242380
       - kube_etcd
 
@@ -105,13 +105,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000270
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000270
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000090
-      - SV-242382r712502_rule
+      - SV-242382r863958_rule
       - V-242382
       - kube_api_server
 
@@ -123,13 +123,13 @@
       insertafter: '^\s+- kube-scheduler'
   when:
       - cntr_k8_000300
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000300
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000090
-      - SV-242384r712508_rule
+      - SV-242384r863960_rule
       - V-242384
       - kube_scheduler
 
@@ -141,13 +141,13 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000310
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000310
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000090
-      - SV-242385r712511_rule
+      - SV-242385r863961_rule
       - V-242385
       - kube_control_manager
 
@@ -159,13 +159,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000350
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000350
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000100
-      - SV-242389r712523_rule
+      - SV-242389r863965_rule
       - V-242389
       - kube_api_server
 
@@ -177,7 +177,7 @@
       state: stopped
       enabled: false
   when:
-      - kubernetes_master
+      - cntrk8stig_control_plane
       - "'sshd' in ansible_facts.packages"
       - cntr_k8_000400 or
         cntr_k8_000410
@@ -188,8 +188,8 @@
       - CCI-000213
       - SRG-APP-000033-CTR-000100
       - SRG-APP-000033-CTR-000095
-      - SV-242389r712523_rule
-      - SV-242394r717017_rule
+      - SV-242393r863969_rule
+      - SV-242394r863970_rule
       - V-242389
       - V-242394
       - sshd
@@ -213,7 +213,7 @@
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000095
-      - SV-242395r712541_rule
+      - SV-242395r863971_rule
       - V-242395
       - kube_dashboard
 
@@ -237,70 +237,40 @@
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000090
-      - SV-242396r712544_rule
+      - SV-242396r863972_rule
       - V-242396
       - kubectl
 
 - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
-  block:
-      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates files"
-        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet | cut -d":" -f1
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000450_feature_gates_files
-
-      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Update DynamicAuditing"
-        ansible.builtin.replace:
-            path: "{{ item }}"
-            regexp: 'DynamicAuditing=true'
-            replace: "DynamicAuditing=false"
-        with_items:
-            - "{{ cntr_k8_000450_feature_gates_files.stdout_lines }}"
-        when: cntr_k8_000450_feature_gates_files.stdout | length >=1
+  ansible.builtin.replace:
+      path: "{{ item.path }}"
+      regexp: 'DynamicAuditing=true'
+      replace: "DynamicAuditing=false"
+  with_items:
+      - "{{ cntrk8stig_split_fg }}"
   when:
+      - cntrk8stig_split_fg is defined
       - cntr_k8_000450
-      - kubernetes_master
   tags:
       - CNTR-K8-000450
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000100
-      - SV-242398r717019_rule
+      - SV-242398r863974_rule
       - V-242398
       - kube_api_server
 
-- name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled."
+- name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled."
   block:
-      - name: "MEDIUM | CNTR-K8-000450 | AUDIT | Kubernetes DynamicAuditing must not be enabled. | Get feature-gates"
-        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/* /etc/sysconfig/kublet
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000450_feature_gates
-
-      - name: "MEDIUM | CNTR-K8-000450 | AUDIT | Kubernetes DynamicAuditing must not be enabled | Split Get feature-gates values"
-        ansible.builtin.set_fact:
-            cntr_k8_000450_split_fg: "{{ cntr_k8_000450_feature_gates.stdout_lines | map('regex_replace', ld_passwd_regex, ld_passwd_yaml) | map('from_yaml') | list }}"
-        vars:
-            ld_passwd_regex: >-
-                ^(?P<path>[^:]*):(?P<entry>[^:]*)
-            ld_passwd_yaml: |
-                path: >-4
-                    \g<path>
-                entry: >-4
-                    \g<entry>
-        when: cntr_k8_000450_feature_gates.stdout | length >= 1
-
-      - name: "MEDIUM | CNTR-K8-000450 | PATCH | Kubernetes DynamicAuditing must not be enabled. | Update DynamicKubeletConfig"
+      - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Update DynamicKubeletConfig"
         ansible.builtin.replace:
             path: "{{ item.path }}"
             regexp: 'DynamicKubeletConfig=true'
             replace: "DynamicKubeletConfig=false"
         notify: kubelet restart
         with_items:
-            - "{{ cntr_k8_000450_split_fg }}"
-        when:
-            - cntr_k8_000450_feature_gates.stdout | length >= 1
-            - "'DynamicKubeletConfig=true' in item.entry"
+            - "{{ cntrk8stig_split_fg }}"
+        when: "'DynamicKubeletConfig=true' in item.entry"
 
       - name: "MEDIUM | CNTR-K8-000460 | PATCH | Kubernetes DynamicKubeletConfig must not be enabled. | Add DynamicKubeletConfig"
         ansible.builtin.lineinfile:
@@ -310,67 +280,44 @@
             insertafter: '^\s+- kube-apiserver'
         notify: kubelet restart
         with_items:
-            - "{{ cntr_k8_000450_split_fg }}"
+            - "{{ cntrk8stig_split_fg }}"
         loop_control:
             label: "{{ item.path }}"
-        when:
-            - cntr_k8_000450_feature_gates.stdout | length >= 1
-            - "'DynamicKubeletConfig=' not in item.entry"
+        when: "'DynamicKubeletConfig=' not in item.entry"
   when:
+      - cntrk8stig_split_fg is defined
       - cntr_k8_000460
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000460
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000095
-      - SV-242399r717021_rule
+      - SV-242399r863975_rule
       - V-242399
       - feature_gates
 
 - name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled."
-  block:
-      - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Get feature-gate paths and entries"
-        ansible.builtin.shell: grep -is feature-gates /etc/kubernetes/manifests/*
-        changed_when: false
-        failed_when: false
-        register: cntr_k8_000470_feature_gates
-
-      - name: "MEDIUM | CNTR-K8-000470 | AUDIT | The Kubernetes API server must have Alpha APIs disabled. | Split Get feature-gates values"
-        ansible.builtin.set_fact:
-            cntr_k8_000470_split_fg: "{{ cntr_k8_000470_feature_gates.stdout_lines | map('regex_replace', split_000470_regex, split_000470_yaml) | map('from_yaml') | list }}"
-        vars:
-            split_000470_regex: >-
-                ^(?P<path>[^:]*):(?P<entry>[^:]*)
-            split_000470_yaml: |
-                path: >-4
-                    \g<path>
-                entry: >-4
-                    \g<entry>
-        when: cntr_k8_000470_feature_gates.stdout | length >= 1
-
-      - name: "MEDIUM | CNTR-K8-000470 | PATCH | The Kubernetes API server must have Alpha APIs disabled. | Update AllAlpha"
-        ansible.builtin.replace:
-            path: "{{ item.path }}"
-            regexp: 'AllAlpha=true'
-            replace: 'AllAlpha=false'
-        notify: kubelet restart
-        with_items:
-            - "{{ cntr_k8_000470_split_fg }}"
-        loop_control:
-            label: "{{ item.path }}"
-        when:
-            - cntr_k8_000470_feature_gates.stdout | length >=1
-            - "'AllAlpha=true' in item.entry"
+  ansible.builtin.replace:
+      path: "{{ item.path }}"
+      regexp: 'AllAlpha=true'
+      replace: 'AllAlpha=false'
+  notify: kubelet restart
+  with_items:
+      - "{{ cntrk8stig_split_fg }}"
+  loop_control:
+      label: "{{ item.path }}"
   when:
+      - cntrk8stig_split_fg is defined
       - cntr_k8_000470
-      - kubernetes_master
+      - cntrk8stig_control_plane
+      - "'AllAlpha=true' in item.entry"
   tags:
       - CNTR-K8-000470
       - CAT2
       - CCI-000213
       - SRG-APP-000033-CTR-000090
-      - SV-242400r712556_rule
+      - SV-242400r863976_rule
       - V-242400
       - feature_gates
 
@@ -382,13 +329,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000600
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000600
       - CAT2
       - CCI-001464
       - SRG-APP-000092-CTR-000165
-      - SV-242401r712559_rule
+      - SV-242401r863977_rule
       - V-242401
       - kube_api_server
 
@@ -400,13 +347,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_000610
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000610
       - CAT2
       - CCI-001464
       - SRG-APP-000092-CTR-000165
-      - SV-242402r712562_rule
+      - SV-242402r863978_rule
       - V-242402
       - kube_api_server
 
@@ -416,7 +363,7 @@
       dest: "{{ cntrk8stig_api_server_audit_policy_file }}"
   when:
       - cntr_k8_000700
-      - kubernetes_master
+      - cntrk8stig_control_plane
       - cntrk8stig_ansible_managed_audit_policy
   tags:
       - CNTR-K8-000700
@@ -435,7 +382,7 @@
       - CCI-001814
       - CCI-002234
       - SRG-APP-000026-CTR-000070
-      - SV-242403r712565_rule
+      - SV-242403r863979_rule
       - V-242403
       - kube_api_server
 
@@ -453,7 +400,7 @@
       - CAT2
       - CCI-001499
       - SRG-APP-000133-CTR-000290
-      - SV-242404r712568_rule
+      - SV-242404r863980_rule
       - V-242404
       - kubelet_sysconfig
 
@@ -485,7 +432,7 @@
   when:
       - cntr_k8_000860 or
         cntr_k8_000900
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000860
       - CNTR-K8-000900
@@ -493,8 +440,8 @@
       - CCI-001499
       - SRG-APP-000133-CTR-000295
       - SRG-APP-000133-CTR-000310
-      - SV-242405r712571_rule
-      - SV-242408r712580_rule
+      - SV-242405r863981_rule
+      - SV-242408r863984_rule
       - V-242405
       - V-242408
       - permissions
@@ -522,7 +469,7 @@
   when:
       - cntr_k8_000880 or
         cntr_k8_000890
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000880
       - CNTR-K8-000890
@@ -530,8 +477,8 @@
       - CCI-001499
       - SRG-APP-000133-CTR-000300
       - SRG-APP-000133-CTR-000305
-      - SV-242406r712574_rule
-      - SV-242407r799982_rule
+      - SV-242406r863982_rule
+      - SV-242407r863983_rule
       - V-242406
       - V-242407
       - permissions
@@ -544,13 +491,13 @@
       insertafter: '^\s+- kube-controller-manager$'
   when:
       - cntr_k8_000910
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000910
       - CAT2
       - CCI-000381
       - SRG-APP-000141-CTR-000315
-      - SV-242409r712583_rule
+      - SV-242409r863985_rule
       - V-242409
       - kube_control_manager
 
@@ -592,13 +539,13 @@
             warn_control_id: 'CNTR-K8-000920'
   when:
       - cntr_k8_000920
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000920
       - CAT2
       - CCI-000382
       - SRG-APP-000142-CTR-000325
-      - SV-242410r808576_rule
+      - SV-242410r863986_rule
       - V-242410
       - ppsm_cal
 
@@ -640,13 +587,13 @@
             warn_control_id: 'CNTR-K8-000930'
   when:
       - cntr_k8_000930
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000930
       - CAT2
       - CCI-000382
       - SRG-APP-000142-CTR-000325
-      - SV-242411r712589_rule
+      - SV-242411r863987_rule
       - V-242411
       - ppsm_cal
 
@@ -679,13 +626,13 @@
             warn_control_id: 'CNTR-K8-000940'
   when:
       - cntr_k8_000940
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000940
       - CAT2
       - CCI-000382
       - SRG-APP-000142-CTR-000330
-      - SV-242412r808578_rule
+      - SV-242412r863988_rule
       - V-242412
       - ppsm_cal
 
@@ -711,13 +658,13 @@
             warn_control_id: 'CNTR-K8-000940'
   when:
       - cntr_k8_000950
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000950
       - CAT2
       - CCI-000382
       - SRG-APP-000142-CTR-000325
-      - SV-242413r712595_rule
+      - SV-242413r863989_rule
       - V-242413
       - ppsm_cal
 
@@ -727,13 +674,13 @@
   failed_when: false
   when:
       - cntr_k8_000960
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-000960
       - CAT2
       - CCI-000382
       - SRG-APP-000142-CTR-000330
-      - SV-242414r717030_rule
+      - SV-242414r863990_rule
       - V-242414
       - namespace
       - not_implemented
@@ -744,13 +691,13 @@
   failed_when: false
   when:
       - cntr_k8_001360
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001360
       - CAT2
       - CCI-001082
       - SRG-APP-000211-CTR-000530
-      - SV-242417r712607_rule
+      - SV-242417r863992_rule
       - V-242417
       - namespace
       - not_implemented
@@ -763,13 +710,13 @@
       insertafter: '^\s+- kube-apiserver$'
   when:
       - cntr_k8_001400
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001400
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242418r799985_rule
+      - SV-242418r863993_rule
       - V-242418
       - kube_api_server
       - cyphers
@@ -783,7 +730,7 @@
   notify: kubelet restart
   when:
       - cntr_k8_001410
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001410
       - CAT2
@@ -800,13 +747,13 @@
   failed_when: false
   when:
       - cntr_k8_001420
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001420
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242420r799987_rule
+      - SV-242420r863995_rule
       - V-242420
       - kubelet
       - not_implemented
@@ -820,13 +767,13 @@
   notify: kubelet restart
   when:
       - cntr_k8_001430
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001430
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242421r717033_rule
+      - SV-242421r863996_rule
       - V-242421
       - kube_control_manager
 
@@ -843,13 +790,13 @@
       label: "{{ item.line }}"
   when:
       - cntr_k8_001440
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001440
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242422r712622_rule
+      - SV-242422r863997_rule
       - V-242422
       - kube_api_server
 
@@ -861,13 +808,13 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001450
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001450
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242423r808580_rule
+      - SV-242423r863998_rule
       - V-242423
       - kube_etcd
 
@@ -913,13 +860,13 @@
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001460
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001460
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242424r825890_rule
+      - SV-242424r863999_rule
       - V-242424
       - kubelet
 
@@ -965,13 +912,13 @@
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001470
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001470
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242425r825892_rule
+      - SV-242425r864000_rule
       - V-242425
       - kubelet
 
@@ -983,13 +930,13 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001480
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001480
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242426r821607_rule
+      - SV-242426r864001_rule
       - V-242426
       - kube_etcd
 
@@ -1001,13 +948,13 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001490
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001490
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242427r808583_rule
+      - SV-242427r864002_rule
       - V-242427
       - kube_etcd
 
@@ -1019,16 +966,15 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001500
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001500
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242428r808586_rule
+      - SV-242428r864003_rule
       - V-242428
       - kube_etcd
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001510 | PATCH | Kubernetes etcd must have the SSL Certificate Authority set."
   ansible.builtin.lineinfile:
@@ -1038,13 +984,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001510
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001510
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242429r808589_rule
+      - SV-242429r864004_rule
       - V-242429
       - kube_api_server
 
@@ -1056,13 +1002,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001520
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001520
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242430r808592_rule
+      - SV-242430r864005_rule
       - V-242430
       - kube_api_server
 
@@ -1074,13 +1020,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_001530
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001530
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242431r808595_rule
+      - SV-242431r864006_rule
       - V-242431
       - kube_api_server
 
@@ -1092,13 +1038,13 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001540
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001540
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242432r808597_rule
+      - SV-242432r864007_rule
       - V-242432
       - kube_etcd
 
@@ -1110,15 +1056,56 @@
       insertafter: '^\s+- etcd'
   when:
       - cntr_k8_001550
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001550
       - CAT2
       - CCI-001184
       - SRG-APP-000219-CTR-000550
-      - SV-242433r808599_rule
+      - SV-242433r864008_rule
       - V-242433
       - kube_etcd
+
+- name: "MEDIUM | CNTR-K8-002001 | PATCH | Kubernetes must have a Pod Security Admission feature gate set."
+  ansible.builtin.debug:
+      msg:
+          - "Warning! This is a manual task"
+          - "Please make sure PodScurity is set to true in every Kubernetes config file"
+  when:
+      - cntr_k8_002001
+  tags:
+      - CNTR-K8-002001
+      - CAT2
+      - CCI-002263
+      - SRG-APP-000342-CTR-000775
+      - SV-254801r864044_rule
+      - V-254801
+      - kubelet
+      - not_implemented
+
+- name: "MEDIUM | CNTR-K8-002011 | PATCH | Kubernetes must have a Pod Security Admission control file configured."
+  block:
+      - name: "MEDIUM | CNTR-K8-002011 | PATCH | Kubernetes must have a Pod Security Admission control file configured. | Set --admission-control-config-file"
+        ansible.builtin.lineinfile:
+            path: "{{ api_server_pod_specification_file }}"
+            regexp: '^(\s+- --admission-control-config-file=.*)$'
+            line: "    - --admission-control-config-file={{ cntrk8stig_admission_cntrl_cnfg_file }}"
+            insertafter: '^\s+- kube-apiserver'
+
+      - name: "MEDIUM | CNTR-K8-002011 | PATCH | Kubernetes must have a Pod Security Admission control file configured. | Create Admission Control Config file if needed"
+        ansible.builtin.template:
+            src: admission_control_config_file.yaml.j2
+            dest: "{{ cntrk8stig_admission_cntrl_cnfg_file }}"
+        when: cntrk8stig_admission_cntrl_confg_create
+  when:
+      - cntr_k8_002011
+  tags:
+      - CNTR-K8-002011
+      - CAT2
+      - CCI-002263
+      - SRG-APP-000342-CTR-000775
+      - SV-254800r864040_rule
+      - V-254800
 
 - name: "MEDIUM | CNTR-K8-002600 | PATCH | Kubernetes API Server must configure timeouts to limit attack surface."
   ansible.builtin.lineinfile:
@@ -1128,13 +1115,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_002600
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002600
       - CAT2
       - CCI-002385
       - SRG-APP-000435-CTR-001070
-      - SV-242438r754802_rule
+      - SV-242438r864013_rule
       - V-242438
       - kube_api_server
 
@@ -1144,13 +1131,13 @@
   failed_when: false
   when:
       - cntr_k8_002700
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002700
       - CAT2
-      - CCI-002617
+      - CCI-002647
       - SRG-APP-000454-CTR-001110
-      - SV-242442r712682_rule
+      - SV-242442r878098_rule
       - V-242442
       - kube_ctl
       - not_implemented_yet
@@ -1170,12 +1157,13 @@
         when: cntrk8stig_kubectl_client_version.stdout is version('1.16.7', '<=')
   when:
       - cntr_k8_002720
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002720
       - CAT2
       - CCI-002605
       - SRG-APP-000456-CTR-001125
-      - SV-242443r712685_rule
+      - SV-242443r864015_rule
       - V-242443
 
 - name: "MEDIUM | CNTR-K8-003110 | PATCH | The Kubernetes component manifests must be owned by root."
@@ -1201,7 +1189,7 @@
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001325
-      - SV-242444r712688_rule
+      - SV-242444r864016_rule
       - V-242444
       - permissions
 
@@ -1259,8 +1247,8 @@
       - CCI-000366
       - SRG-APP-000516-CTR-001325
       - SRG-APP-000516-CTR-001335
-      - SV-242445r712691_rule
-      - SV-242459r712733_rule
+      - SV-242445r864017_rule
+      - SV-242459r864024_rule
       - V-242445
       - V-242459
       - permissions
@@ -1287,8 +1275,8 @@
       - CCI-000366
       - SRG-APP-000516-CTR-001325
       - SRG-APP-000516-CTR-001335
-      - SV-242446r712694_rule
-      - SV-242460r712736_rule
+      - SV-242446r864018_rule
+      - SV-242460r864025_rule
       - V-242446
       - V-242460
       - permissions
@@ -1311,7 +1299,7 @@
             path: "{{ proxy_kubeconfig_file }}"
             mode: "{{ cntr_k8_003140 | ternary('644',omit) }}"
             owner: "{{ cntr_k8_003150 | ternary('root',omit) }}"
-            gropu: "{{ cntr_k8_003150 | ternary('root',omit) }}"
+            group: "{{ cntr_k8_003150 | ternary('root',omit) }}"
         when: cntr_k8_003140_proxy_config_file_status.stat.exists
   when:
       - cntr_k8_003140 or
@@ -1322,8 +1310,8 @@
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001325
-      - SV-242447r821612_rule
-      - SV-242448r712700_rule
+      - SV-242446r864018_rule
+      - SV-242446r864018_rule
       - V-242447
       - V-242448
       - permissions
@@ -1339,15 +1327,15 @@
   when:
       - cntr_k8_003160 or
         cntr_k8_003170
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003160
       - CNTR-K8-003170
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001325
-      - SV-242449r821614_rule
-      - SV-242450r754804_rule
+      - SV-242449r864021_rule
+      - SV-242450r864022_rule
       - V-242449
       - V-242450
       - permissions
@@ -1482,7 +1470,7 @@
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001335
-      - SV-242458r754806_rule
+      - SV-242458r864023_rule
       - V-242458
       - permissions
 
@@ -1494,13 +1482,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003280
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003280
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001335
-      - SV-242461r712739_rule
+      - SV-242461r864026_rule
       - V-242461
       - kube_api_server
 
@@ -1512,13 +1500,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003290
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003290
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001335
-      - SV-242462r712742_rule
+      - SV-242462r864027_rule
       - V-242462
       - kube_api_server
 
@@ -1530,13 +1518,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003300
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003300
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001335
-      - SV-242463r712745_rule
+      - SV-242463r864028_rule
       - V-242463
       - kube_api_server
 
@@ -1548,13 +1536,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003310
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003310
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001335
-      - SV-242464r754808_rule
+      - SV-242464r864029_rule
       - V-242464
       - kube_api_server
 
@@ -1566,13 +1554,13 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003320
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003320
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001335
-      - SV-242465r754810_rule
+      - SV-242465r864030_rule
       - V-242465
       - kube_api_server
 
@@ -1600,7 +1588,7 @@
       - CAT2
       - CCI-000366
       - SRG-APP-000516-CTR-001335
-      - SV-242467r712757_rule
+      - SV-242467r878165_rule
       - V-242467
       - permissions
 
@@ -1612,16 +1600,15 @@
       insertafter: '^\s+- kube-apiserver'
   when:
       - cntr_k8_003350
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-003350
       - CAT2
       - CCI-001453
       - SRG-APP-000560-CTR-001340
-      - SV-242468r712760_rule
+      - SV-242468r864031_rule
       - V-242468
       - kube_api_server
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-001300 | PATCH | Kubernetes Kubelet must not disable timeouts."
   block:
@@ -1665,16 +1652,15 @@
             - "'/etc/systemd/system/kubelet.service.d' in kubelet_file"
   when:
       - cntr_k8_001300
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-001300
       - CAT2
       - CCI-001133
       - SRG-APP-000190-CTR-000500
-      - SV-245541r821621_rule
+      - SV-245541r864032_rule
       - V-245541
       - kubelet
-      - not_implemented_yet
 
 - name: "MEDIUM | CNTR-K8-002630 | PATCH | Kubernetes API Server must disable token authentication to protect information in transit."
   ansible.builtin.lineinfile:
@@ -1683,13 +1669,13 @@
       state: absent
   when:
       - cntr_k8_002630
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002630
       - CAT2
       - CCI-002418
       - SRG-APP-000439-CTR-001080
-      - SV-245543r754894_rule
+      - SV-245543r864034_rule
       - V-245543
 
 - name: "MEDIUM | CNTR-K8-002640 | PATCH | Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit"
@@ -1705,13 +1691,12 @@
       label: "{{ item.line }}"
   when:
       - cntr_k8_002640
-      - kubernetes_master
+      - cntrk8stig_control_plane
   tags:
       - CNTR-K8-002640
       - CAT2
       - CCI-002418
       - SRG-APP-000439-CTR-001080
-      - SV-245544r754897_rule
+      - SV-245544r864035_rule
       - V-245544
       - kube_api_server
-      - not_implemented_yet

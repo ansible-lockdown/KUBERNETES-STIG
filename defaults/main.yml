@@ -9,7 +9,7 @@ cntrk8stig_cat3_patch: true
 # however the time you run this role might not be the best time to reboot, so we allow flexability
 cntrk8stig_skip_reboot: true
 
-kubernetes_master: true
+cntrk8stig_control_plane: true
 
 # These variables correspond with the STIG IDs defined in the STIG and allows you to enable/disable specific rules.
 # PLEASE NOTE: These work in coordination with the cat1, cat2, cat3 group variables. You must enable an entire group
@@ -79,6 +79,8 @@ cntr_k8_001520: true
 cntr_k8_001530: true
 cntr_k8_001540: true
 cntr_k8_001550: true
+cntr_k8_002001: true
+cntr_k8_002011: true
 cntr_k8_002600: true
 cntr_k8_002700: true
 cntr_k8_002720: true
@@ -219,6 +221,15 @@ cntrk8stig_tls_cert_file: "/etc/kubernetes/pki/apiserver.crt"
 # to conform to STIG standards please point to an approved organizational certificate
 cntrk8stig_tls_privkey_file: "/etc/kubernetes/pki/apiserver.key"
 
+# CNTR-K8-002011
+# cntrk8stig_admission_cntrl_cnfg_file is the path and file name to the admission control config file in the api server config
+# To conform to STIG standards please point this to a valid site approved file
+cntrk8stig_admission_cntrl_cnfg_file: "/etc/kubernetes/admission-control.yaml"
+# cntrk8stig_admission_cntrl_confg_create is the toggle to allow this remediation role create the admission control config file
+# The file will be created from the admission_control_config_file.yaml.j2 template file in the templates folder
+# The final path and filename will be the value in the cntrk8stig_admission_cntrl_cnfg_file variable
+# If this value is set to true please manage the file via the template template file.
+cntrk8stig_admission_cntrl_confg_create: true
 
 # CNTR-K8-003280
 # cntrk8stig_kubeapi_audit_policy_file is the path to the audit policy config file
