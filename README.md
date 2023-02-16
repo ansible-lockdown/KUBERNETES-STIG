@@ -2,7 +2,7 @@
 
 Configure a Kubernetes install to be DISA STIG compliant. All findings will be audited by default. Non-disruptive CAT I, CAT II, and CAT III findings will be corrected by default. Disruptive finding remediation can be enabled by setting `cntrk8stig_disruption_high` to `yes`.
 
-This role is based on Kubernetes DISA STIG: [Version 1, Rel 6 released on  Jul 27, 2022](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R6_STIG.zip).
+This role is based on Kubernetes DISA STIG: [Version 1, Rel 8 released on  Jan 26, 2023](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R8_STIG.zip).
 
 ## Join us
 
@@ -32,7 +32,8 @@ There is no audit role for this benchmark at this time. Please keep checking bac
   - [Tower User Guide](https://docs.ansible.com/ansible-tower/latest/html/userguide/index.html)
   - [Ansible Community Info](https://docs.ansible.com/ansible/latest/community/index.html)
 - Functioning Ansible and/or Tower Installed, configured, and running. This includes all of the base Ansible/Tower configurations, needed packages installed, and infrastructure setup.
-- Please read through the tasks in this role to gain an understanding of what each control is doing. Some of the tasks are disruptive and can have unintended consequences in a live production system. Also familiarize yourself with the variables in the defaults/main.yml file or the [Main Variables Wiki Page](https://github.com/ansible-lockdown/KUBERNETES-STIG/wiki/Main-Variables).
+- Please read through the tasks in this role to gain an understanding of what each control is doing. Some of the tasks are disruptive and can have unintended consequences in a live production system. Also familiarize yourself with the variables in the defaults/main.yml file.
+- There are currently no CAT3 STIG controls, that is not a missing section in this role.
 
 ## Documentation
 
@@ -41,7 +42,6 @@ There is no audit role for this benchmark at this time. Please keep checking bac
 - [Customizing Roles](https://www.lockdownenterprise.com/docs/customizing-lockdown-enterprise)
 - [Per-Host Configuration](https://www.lockdownenterprise.com/docs/per-host-lockdown-enterprise-configuration)
 - [Getting the Most Out of the Role](https://www.lockdownenterprise.com/docs/get-the-most-out-of-lockdown-enterprise)
-- [Wiki](https://github.com/ansible-lockdown/KUBERNETES-STIG/wiki)
 
 ## Dependencies
 
@@ -56,7 +56,7 @@ Package 'python-xmltodict' is required if you enable the OpenSCAP tool installat
 
 ## Role Variables
 
-This role is designed that the end user should not have to edit the tasks themselves. All customizing should be done via the defaults/main.yml file or with extra vars within the project, job, workflow, etc. These variables can be found [here](https://github.com/ansible-lockdown/KUBERNETES-STIG/wiki/Main-Variables) in the Main Variables Wiki page. All variables are listed there along with descriptions.
+This role is designed that the end user should not have to edit the tasks themselves. All customizing should be done via the defaults/main.yml file or with extra vars within the project, job, workflow, etc.
 
 ### Tags
 
