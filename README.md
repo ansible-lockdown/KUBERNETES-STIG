@@ -1,8 +1,51 @@
 # Kubernetes DISA STIG
 
-Configure a Kubernetes install to be DISA STIG compliant. All findings will be audited by default. Non-disruptive CAT I, CAT II, and CAT III findings will be corrected by default. Disruptive finding remediation can be enabled by setting `cntrk8stig_disruption_high` to `yes`.
+## Configure a Kubernetes system to be [DISA STIG](https://public.cyber.mil/stigs/downloads/) compliant.
 
-This role is based on Kubernetes DISA STIG: [Version 1, Rel 8 released on  Jan 26, 2023](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R8_STIG.zip).
+### Based on [ Kubernetes DISA STIG Version 1, Rel 8 released on  Jan 26, 2023 ](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R8_STIG.zip)
+
+---
+
+![Org Stars](https://img.shields.io/github/stars/ansible-lockdown?label=Org%20Stars&style=social)
+![Stars](https://img.shields.io/github/stars/ansible-lockdown/rhel7-cis?label=Repo%20Stars&style=social)
+![Forks](https://img.shields.io/github/forks/ansible-lockdown/rhel7-cis?style=social)
+![followers](https://img.shields.io/github/followers/ansible-lockdown?style=social)
+[![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/AnsibleLockdown.svg?style=social&label=Follow%20%40AnsibleLockdown)](https://twitter.com/AnsibleLockdown)
+
+<!-- ![Ansible Galaxy Quality](https://img.shields.io/ansible/quality/56324?label=Quality&&logo=ansible) -->
+![Discord Badge](https://img.shields.io/discord/925818806838919229?logo=discord)
+
+![Devel Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/KUBERNETES-STIG/linux_benchmark_testing.yml?label=Devel%20Build%20Status)
+![Devel Commits](https://img.shields.io/github/commit-activity/m/ansible-lockdown/KUBERNETES-STIG/devel?color=dark%20green&label=Devel%20Branch%20commits)
+
+![Release Branch](https://img.shields.io/badge/Release%20Branch-Main-brightgreen) 
+![Main Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/KUBERNETES-STIG/linux_benchmark_testing.yml?label=Build%20Status)
+![Main Release Date](https://img.shields.io/github/release-date/ansible-lockdown/KUBERNETES-STIG?label=Release%20Date)
+![Release Tag](https://img.shields.io/github/v/tag/ansible-lockdown/KUBERNETES-STIG?label=Release%20Tag&&color=success)
+
+![Issues Open](https://img.shields.io/github/issues-raw/ansible-lockdown/KUBERNETES-STIG?label=Open%20Issues)
+![Issues Closed](https://img.shields.io/github/issues-closed-raw/ansible-lockdown/KUBERNETES-STIG?label=Closed%20Issues&&color=success)
+![Pull Requests](https://img.shields.io/github/issues-pr/ansible-lockdown/KUBERNETES-STIG?label=Pull%20Requests)
+
+![License](https://img.shields.io/github/license/ansible-lockdown/KUBERNETES-STIG?label=License)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Configure a Kubernetes install to be DISA STIG compliant. All findings will be audited by default. Non-disruptive CAT I, CAT II, and CAT III findings will be corrected by default. Disruptive finding remediation can be enabled by setting `cntrk8stig_disruption_high` to `yes`.
+
+This role is based on Kubernetes DISA STIG: [Version 1, Rel 8 released on  Jan 26, 2023](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R8_STIG.zip). -->
 
 ## Join us
 
