@@ -31,6 +31,17 @@
 
 ---
 
+## Looking for support?
+
+[Lockdown Enterprise](https://www.lockdownenterprise.com#GH_Kuber)
+
+[Ansible support](https://www.mindpointgroup.com/cybersecurity-products/ansible-counselor#GH_AL_KUBERNETES_stig)
+
+### Community
+
+On our [Discord Server](https://discord.io/ansible-lockdown) to ask questions, discuss features, or just chat with other Ansible-Lockdown users
+
+---
 
 
 
