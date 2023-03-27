@@ -212,7 +212,7 @@ cntrk8stig_kubeapi_root_ca_file: "/etc/srv/kubernetes/pki/root-ca-certificates.c
 
 # CNTR-K8-001440
 # CNTR-K8-001460
-# CNTR-K8-001470
+# CNTR-K8-001470  CHIRS HEAD IS THE WHAT IF SHE COMES OFF ECMO AND STILL NEEDS IT and her lungs dont start back
 # CNTR-K8-001490
 # cntrk8stig_tls_cert_file is the tls certificate path and file
 # To conform to STIG standards please point to an approved organizational certificate
