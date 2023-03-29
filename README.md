@@ -2,7 +2,7 @@
 
 ## Configure a Kubernetes system to be [DISA STIG](https://public.cyber.mil/stigs/downloads/) compliant.
 
-### Based on [ Kubernetes DISA STIG Version 1, Rel 8 released on  Jan 26, 2023 ](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R8_STIG.zip)
+### Based on [ Kubernetes DISA STIG Version 1, Rel 8 released on Jan 26, 2023 ](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R8_STIG.zip)
 
 ---
 
